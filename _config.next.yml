@@ -149,18 +149,16 @@ sidebar:
 
 codeblock:
   # Code Highlight theme
-  # See: https://github.com/highlightjs/highlight.js/tree/master/src/styles
-  # darcula | github-gist | atom-one-dark
+  # All available themes: https://theme-next.js.org/highlight/
   theme:
     light: darcula
     dark: tomorrow-night
-  # See: https://github.com/PrismJS/prism/tree/master/themes
   prism:
     light: prism
     dark: prism-dark
   # Add copy button on codeblock
   copy_button:
-    enable: true
+    enable: false
     # Available values: default | flat | mac
     style: flat
 
@@ -256,14 +254,3 @@ exif:
 disable_baidu_transformation: true
 canonical: true
 seo: true
-
-vendors:
-  pjax: //cdn.jsdelivr.net/gh/theme-next/theme-next-pjax@0/pjax.min.js
-  pace: //cdn.jsdelivr.net/npm/pace-js@1/pace.min.js
-  pace_css: //cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css
-
-  fontawesome: https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css
-
-  # prism: //cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js
-  # prism_autoloader: //cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js
-  # prism_line_numbers: //cdn.jsdelivr.net/npm/prismjs@1/plugins/line-numbers/prism-line-numbers.js
