@@ -20,11 +20,12 @@
   },
   "homepage": "https://github.com/mambo-docs/mambo-docs.github.io#readme",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
     "hexo": "^5.1.1",
     "hexo-browsersync": "^0.3.0",
     "hexo-deployer-git": "^2.1.0",
     "hexo-filter-emoji": "^2.2.1",
+    "hexo-front-matter": "^2.0.0",
+    "hexo-fs": "^3.1.0",
     "hexo-generator-alias": "^1.0.0",
     "hexo-generator-archive": "^1.0.0",
     "hexo-generator-category": "^1.0.0",
@@ -38,6 +39,7 @@
     "hexo-renderer-stylus": "^2.0.1",
     "hexo-renderer-swig": "^1.1.0",
     "hexo-server": "^2.0.0",
+    "hexo-util": "^2.4.0",
     "highlight.js": "^10.1.2",
     "markdown-it-named-headings": "^1.1.0"
   }
