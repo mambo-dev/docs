@@ -12,13 +12,13 @@ minify: false
 
 # Custom Settings
 custom_file_path:
-    #head:                   source/_data/head.swig
-    #header:                 source/_data/header.swig
-    #sidebar:                source/_data/sidebar.swig
-    #postMeta:               source/_data/post-meta.swig
-    #postBodyEnd:            source/_data/post-body-end.swig
-    #footer:                 source/_data/footer.swig
-    #bodyEnd:                source/_data/body-end.swig
+    #head:                   source/_data/head.njk
+    #header:                 source/_data/header.njk
+    #sidebar:                source/_data/sidebar.njk
+    #postMeta:               source/_data/post-meta.njk
+    #postBodyEnd:            source/_data/post-body-end.njk
+    #footer:                 source/_data/footer.njk
+    #bodyEnd:                source/_data/body-end.njk
     variable:                source/_data/variables.styl
     mixin:                   source/_data/mixins.styl
     style:                   source/_data/styles.styl
@@ -35,6 +35,17 @@ creative_commons:
 
 scheme:                      Gemini
 darkmode:                    false
+
+favicon:
+  small: /images/favicon/favicon-16x16.png
+  medium: /images/favicon/favicon-32x32.png
+  apple_touch_icon: /images/favicon/apple-touch-icon.png
+  safari_pinned_tab: /images/favicon/logo.svg
+  #android_manifest: /images/manifest.json
+  #ms_browserconfig: /images/browserconfig.xml
+
+# Custom Logo (Warning: Do not support scheme Mist)
+custom_logo: #/images/favicon/android-chrome-192x192.png
 
 menu_settings:
     icons: true
@@ -61,13 +72,11 @@ font:
   global:
     external:                true
     family:                  Roboto
-    size:                    1
 
   # Font settings for site title (.site-title).
   title:
     external:                true
     family:                  Binggrae-Bold
-    size:                    1.5
 
   # Font settings for headlines (<h1> to <h6>).
   headings:
@@ -92,12 +101,6 @@ avatar:
 pace:
     enable:                  true
     theme:                   center-atom
-
-excerpt:
-  depth: 10
-  excerpt_excludes: []
-  more_excludes: []
-  hideWholePostExcerpts: true
 
 # ---------------------------------------------------------------
 # Third Party Plugins & Services Settings
@@ -243,6 +246,32 @@ post_meta:
     enable: false
     another_day: true
   categories: true
+
+symbols_count_time:
+  separated_meta: true
+  item_text_total: false
+
+related_posts:
+  enable: false
+  title: # Custom header, leave empty to use the default one
+  display_in_home: false
+  params:
+    maxCount: 5
+
+reward_settings:
+  # If true, a donate button will be displayed in every article by default.
+  enable: false
+  animation: false
+  #comment: Buy me a coffee
+
+# Bookmark Support
+bookmark:
+  enable: false
+  # Customize the color of the bookmark.
+  color: "#222"
+  # If auto, save the reading progress when closing the page or clicking the bookmark-icon.
+  # If manual, only save it by clicking the bookmark-icon.
+  save: auto
 
 exif:
   enable: true
