@@ -6,30 +6,30 @@ categories:
 tags:
 - 스프링 프레임워크
 - 스프링 튜토리얼
-description: 잠만보와 함께하는 스프링 프레임워크 기반의 웹 애플리케이션
 ---
 
 ## Overview
 본 글은 스프링 프레임워크 Version `5.2.8.RELEASE` 문서를 기반으로 작성하였습니다.
 
-지난 글에서는 스프링 프레임워크의 기본이 되는 IoC 컨테이너에 대하여 알아보고 애플리케이션 컨텍스트라는 IoC 컨테이너를 직접 구성해보았습니다. 이번 글에서는 스프링 프레임워크의 [`spring-webmvc`](https://mvnrepository.com/artifact/org.springframework/spring-webmvc/5.2.8.RELEASE) 의존성을 추가하여 웹 애플리케이션을 만들어보도록 하겠습니다.
+지난 글에서 우리는 스프링 프레임워크의 기본이 되는 개념인 IoC 컨테이너라는 애플리케이션 컨텍스트에 대해 배웠습니다. 이번 글에서는 스프링 프레임워크 기반의 웹 애플리케이션을 구성하고 실행하는 방법에 대해서 다루겠습니다.
 
 ## Web on Servlet Stack
-스프링 5부터는 웹 애플리케이션이 동작하는 방식이 기존의 서블릿 API를 사용하는 서블릿 스택과 [Reactive Streams](https://www.reactive-streams.org/) 스펙 기반의 [리액티브](https://projectreactor.io/) 스택이 있습니다. 리액티브 스택은 블로킹 기반의 서블릿 스택과 달리 논-블로킹이라는 특징이 있습니다. 리액티브 스택의 웹 애플리케이션을 개발하기 위해서는 우선적으로 비동기 프로그래밍을 배워야하므로 많은 개발자들에게 익숙한 서블릿 스택 기반의 웹 애플리케이션을 만들어보도록 합니다.
+스프링 5 부터 웹 애플리케이션이 동작하는 방식이 기존의 서블릿 API를 사용하는 서블릿 스택과 [Reactive Streams](https://www.reactive-streams.org/) 스펙 기반의 [리액티브](https://projectreactor.io/) 스택이 있습니다. 리액티브 스택은 블로킹 기반의 서블릿 스택과 달리 논-블로킹이라는 특징이 있습니다. 리액티브 스택의 웹 애플리케이션을 개발하기 위해서는 우선적으로 비동기 프로그래밍을 배워야하므로 많은 개발자들에게 익숙한 서블릿 스택 기반의 웹 애플리케이션을 만들어보도록 합니다.
 
-서블릿 스택 기반의 웹 애플리케이션을 만들기 위해 `spring-webmvc`와 `javax.servlet-api` 의존성을 추가합니다.
+서블릿 스택 기반의 웹 애플리케이션을 만들기 위해 [`spring-webmvc`](https://mvnrepository.com/artifact/org.springframework/spring-webmvc/5.2.8.RELEASE)와 `javax.servlet-api` 의존성을 추가합니다.
 ```groovy
 implementation 'org.springframework:spring-webmvc:5.2.8.RELEASE'
 implementation 'javax.servlet:javax.servlet-api:4.0.1'
 ```
 
+자바 웹 애플리케이션을 Tomcat과 같은 웹 컨테이너를 통해 실행할 경우 웹 컨테이너는 클래스패스에 위치한 [`web.xml`](https://cloud.google.com/appengine/docs/flexible/java/configuring-the-web-xml-deployment-descriptor?hl=ko)이라는 배포 설명자 파일을 참조합니다. 스프링 프레임워크의 `spring-web` 모듈에는 배포 설명자 파일인 web.xml을 자바 코드로 대체할 수 있는 특별한 인터페이스를 제공합니다.
+
 ### WebApplicationInitializer
-Tomcat과 같은 웹 컨테이너에서 웹 애플리케이션을 실행할 때 [`web.xml`](https://cloud.google.com/appengine/docs/flexible/java/configuring-the-web-xml-deployment-descriptor?hl=ko)이라는 배포 설명자 파일을 읽습니다. `spring-web` 모듈에서 제공하는 [`WebApplicationInitializer`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/WebApplicationInitializer.html) 인터페이스는 `web.xml`을 대체할 수 있도록 지원합니다.
+웹 컨테이너에서 가장 먼저 참조하는 배포 설명자를 구성하기 위하여 [`WebApplicationInitializer`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/WebApplicationInitializer.html) 인터페이스에 대한 구현체를 생성할 수 있습니다.
 
-다시 말해, 컨테이너는 클래스패스 위치에 web.xml이 없을 경우 WebApplicationInitializer를 web.xml으로 대체하여 읽습니다.
+웹 컨테이너가 실행될 때 클래스패스에 위치한 web.xml 파일이 존재하지 않을 경우 WebApplicationInitializer를 감지하여 web.xml로 대체하여 사용하게 됩니다. 정말로 WebApplicationInitializer로 web.xml을 대체할 수 있는지 확인해봅시다.
 
-이전 글에서 SpringApplication에서 구성하였던 애플리케이션 컨텍스트를 WebApplicationInitializer의 onStartup(ServletContext servletContext) 메소드에서 구성하고 ContextLoaderListener와 DispatherServlet을 기술합니다.
-
+우선 다음과 같이 WebApplicationInitializer 구현체를 클래스패스에 생성합니다.
 ```java
 public class WebServletInitializer implementation WebApplicationInitializer {
     @Override
@@ -44,7 +44,7 @@ public class WebServletInitializer implementation WebApplicationInitializer {
 }
 ```
 
-위 자바 코드는 아래의 web.xml을 기술한 것과 같습니다.
+위 자바 코드는 아래의 web.xml을 기술한 것과 같다고 볼 수 있습니다.
 ```xml web.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
@@ -76,11 +76,12 @@ public class WebServletInitializer implementation WebApplicationInitializer {
 </web-app>
 ```
 
-web.xml에 대한 예제를 찾아보면 루트 컨텍스트와 서블릿 컨텍스트를 나누어서 구성하는 것이 많습니다. 스프링 프레임워크는 WebApplicationInitializer를 확장한 `AbstractAnnotationConfigDispatcherServletInitializer`를 통해서 루트 애플리케이션 컨텍스트와 서블릿 애플리케이션 컨텍스트로 나누어지는 컨텍스트 계층을 구성할 수 있도록 지원합니다.
+위 예제는 `단일 애플리케이션 컨텍스트`로 동작하는 웹 애플리케이션을 구성합니다. 그러나 대부분의 web.xml에 대한 예제를 찾아보면 `루트 애플리케이션 컨텍스트`와 디스패처 서블릿이 참조하는 `서블릿 컨텍스트`를 구분하여 구성한 것이 많습니다. 스프링 프레임워크는 단일 애플리케이션 컨텍스트 구조 뿐만 아니라 루트 애플리케이션 컨텍스트와 서블릿 애플리케이션 컨텍스트를 나누어 컨텍스트 계층을 구성할 수 있는 특별한 `AbstractAnnotationConfigDispatcherServletInitializer` 클래스를 제공합니다.
 
+AbstractAnnotationConfigDispatcherServletInitializer가 클래스패스에 위치하는 경우 다음과 같은 구조로 웹 애플리케이션을 구성할 수 있습니다.
 ![](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/images/mvc-context-hierarchy.png)
 
-위 그림은 스프링 프레임워크 공식 레퍼런스에서 제공하는 다중 컨텍스트 계층을 표현합니다. 루트 애플리케이션 컨텍스트는 웹 레이어와 상관없는 비즈니스 로직의 빈들을 관리하며 서블릿 애플리케이션 컨텍스트는 웹과 관련된 빈들이 있다고 설명합니다.
+위 그림은 스프링 프레임워크 공식 레퍼런스에서 제공하는 `다중 컨텍스트 계층`을 표현합니다. 웹과 관련된 빈 클래스들은 서블릿 웹 애플리케이션 컨텍스트에서 관리되며 루트 애플리케이션 컨텍스트에는 웹과 관련이 없거나 공통적으로 사용되는 빈 클래스들을 관리하도록 합니다.
 
 다음 예제 코드는 AbstractAnnotationConfigDispatcherServletInitializer를 적용하는 예시입니다.
 ```java
@@ -103,22 +104,16 @@ public class WebServletInitializer extends AbstractAnnotationConfigDispatcherSer
 }
 ```
 
-getRootConfigClasses에서 반환하는 클래스는 루트 애플리케이션 컨텍스트에서 컨테이너를 구성하기 위해 참조하며 getServletConfigClasses에서 반환하는 클래스는 서블릿 애플리케이션 컨텍스트를 구성하기 위해 참조합니다.
+루트 애플리케이션 컨텍스트가 참조하는 구성 메타정보는 `getRootConfigClasses`에서 반환합니다. 그리고 서블릿 애플리케이션 컨텍스트에서 참조하는 구성 메타정보는 `getServletConfigClasses`에서 반환합니다. 따라서, 위 예제 코드에서는 루트 애플리케이션 컨텍스트는 AppConfig 클래스에 등록된 빈 클래스들을 관리하게 되고 WebConfig 클래스에 등록된 빈 클래스들은 서블릿 애플리케이션 컨텍스트를 통해 관리됩니다. 
 
-그리고 getServletMappings는 디스패처 서블릿을 생성할 때 매핑되는 경로를 나타냅니다. 이때, 디스패처 서블릿 이름은 dispatcher을 기본으로 사용합니다. 만약, 디스패처 서블릿 이름을 변경하고 싶다면 getServletName() 메소드를 오버라이딩하세요.
+> 이때 만들어지는 디스패처 서블릿은 dispatcher라는 이름을 기본으로 사용합니다.
 
-```java
-public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
-	public static final String DEFAULT_SERVLET_NAME = "dispatcher";
-}
-```
+따라서, 다중 애플리케이션 컨텍스트 계층으로 웹 애플리케이션을 구성한다면 루트 애플리케이션 컨텍스트와 서블릿 애플리케이션 컨텍스트에서 관리해야할 빈들을 잘 구분하여 등록하여 사용하는 것이 좋습니다.
 
-이제 앞으로 추가될 웹과 관련된 구성 메타정보 클래스는 WebConfig가 담당하며 공통으로 사용하거나 비즈니스 로직에서 사용하는 빈들은 AppConfig에서 관리하도록 하겠습니다. 
-
-톰캣에서 읽어야할 배포 설명자인 WebApplicationInitializer가 준비되었으므로 웹 애플리케이션을 구동할 수 있습니다. 만약, 스프링 부트 프로젝트를 기반으로 애플리케이션 개발을 시작한다면 내장된 서버를 사용하여 구동할 수 있습니다. 내장된 서버 중 하나인 임베디드 톰캣 모듈을 활용하여 톰캣을 설치하지 않아도 웹 애플리케이션을 구동할 수 있습니다.
+이제 웹 컨테이너에서 읽어야할 배포 설명자인 WebApplicationInitializer가 준비되었으므로 웹 애플리케이션을 구동할 수 있습니다. 저는 임베디드 톰캣 모듈을 통하여 쉽게 애플리케이션을 구동하는 방법을 설명하도록 하겠습니다.
 
 ### Embedded Tomcat
-톰캣을 실행하기 위하여 `tomcat-embed-core`와 `tomcat-embed-jasper` 의존성을 추가합니다.
+임베디드 톰캣으로 애플리케이션을 실행하기 위하여 `tomcat-embed-core`와 `tomcat-embed-jasper` 의존성을 추가합니다.
 ```groovy build.gradle
 implementation 'org.apache.tomcat.embed:tomcat-embed-core:9.0.37'
 implementation 'org.apache.tomcat.embed:tomcat-embed-jasper:9.0.37'
@@ -129,6 +124,7 @@ SpringApplication에서 톰캣 서버를 실행하도록 다음과 같이 코드
 public class SpringApplication {
     public static void main(final String[] args) throws LifecycleException {
         Tomcat tomcat = new Tomcat();
+        tomcat.setBaseDir("out/webapp");
         Connector connector = tomcat.getConnector();
         connector.setURIEncoding(StandardCharsets.UTF_8.displayName());
 
@@ -140,7 +136,7 @@ public class SpringApplication {
 }
 ```
 
-저는 `srg/main/webapp` 폴더를 생성하여 톰캣이 해당 경로를 webapp으로 사용하도록 하였습니다. 이제 SpringApplication를 실행하면 톰캣이 구동되면서 다음과 같이 로그가 출력됩니다.
+이제 SpringApplication을 실행하고 로그를 확인합니다.
 
 ```java
 ...
@@ -155,25 +151,27 @@ public class SpringApplication {
 
 출력된 로그를 살펴보면 Spring WebApplicationInitializers detected on classpath 에서 확인할 수 있듯이 클래스패스에 있는 WebApplicationInitializer를 web.xml으로 사용하였습니다.
 
-이제 웹 애플리케이션의 메인 경로인 http://localhost:8080 를 브라우저를 통해 요청해봅니다.
+톰캣이 웹 애플리케이션을 정상적으로 구동하였으므로 브라우저를 통해 http://localhost:8080 로 접속해보겠습니다.
 
 ```java
 경고: No mapping for GET /
 ```
 
-디스패처 서블릿이 요청을 처리할 서블릿을 찾을 수 없었고 결국 응답할 수 없음을 나타내었습니다. 이제 메인경로에 대한 요청을 담당할 빈 클래스를 만들어보도록 하겠습니다.
+이런... 디스패처 서블릿이 처리를 위임할 서블릿을 찾을 수 없어 경고 메시지가 출력되었고 브라우저에서는 응답 없음을 확인할 수 있습니다. 이제 우리가 알아야할 것은 웹 요청을 처리할 서블릿을 스프링 프레임워크가 제공하는 클래스로 구성하는 것입니다.
 
 ### Annotated Controllers
-스프링 웹 MVC에서 웹 요청을 처리할 컴포넌트는 `@Controller`와 `@RestController`를 선언하여 등록할 수 있습니다. 그리고 이 컴포넌트들을 서블릿 컨텍스트 구성 메타정보 클래스인 WebConfig으로 등록되도록 합니다.
+스프링 웹 MVC 모듈은 웹 요청을 처리할 컴포넌트를 만들 수 있는 어노테이션을 제공합니다. 스프링 프레임워크에서 웹 요청을 처리하는 컴포넌트를 컨트롤러라고 합니다. 그리고 컨트롤러라는 것을 `@Controller`와 `@RestController`를 선언하여 나타낼 수 있습니다. 
 
+컨트롤러는 웹 관련 빈 클래스이므로 서블릿 웹 애플리케이션 컨텍스트의 구성 메타정보인 `WebConfig`에 등록하겠습니다.
 ```java
 @ComponentScan({"com.example.demo.controller"})
 @Configuration
 public class WebConfig {}
 ```
 
-이제 com.example.demo.controller 패키지에 만들어지는 컨트롤러 컴포넌트들은 서블릿 컨텍스트에 등록됩니다. 다음과 같이 HomeController라는 컨트롤러를 만들고 메인 경로를 처리할 함수를 작성해보겠습니다.
+`@ComponentScan`을 선언하였으므로 `com.example.demo.controller` 패키지에 있는 컨트롤러 컴포넌트들은 서블릿 애플리케이션 컨텍스트에서 관리됩니다. 
 
+다음과 같이 `HomeController`라는 컨트롤러를 만들어 웹 요청을 처리할 `핸들러 함수`를 만들겠습니다.
 ```java
 @Controller
 public class HomeController {
@@ -186,24 +184,33 @@ public class HomeController {
 }
 ```
 
-이제 SpringApplication을 실행하면 디스패처 서블릿이 웹 요청에 대해 처리할 컨트롤러를 찾아 위임하여 HTTP 요청을 처리하고 응답을 받게됩니다. `Hello World`라는 문자열이 표시되었나요?
+이제 SpringApplication을 실행하면 디스패처 서블릿이 웹 요청에 대해 처리할 컨트롤러를 찾아 위임하여 HTTP 요청을 처리하고 응답을 받게됩니다. 
 
-대부분의 스프링 애플리케이션 예제와 달리 요청을 처리하는 함수가 void를 반환하는지 궁금할 수 있습니다. 이제 컨트롤러를 어떻게 작성해야하는지 자세히 알아보도록 하겠습니다. 
+`Hello World`라는 문자열이 브라우저에 표시되었나요?
+
+대부분의 스프링 애플리케이션 예제와 달리 컨트롤러의 핸들러 함수에서 "Hello World"를 반환하지 않는지 궁금해 해야합니다. 저는 어떤 지식을 공부할 때에는 궁금한게 많아야한다고 생각하는 편입니다. 왜 HttpServletResponse에서 `PrintWriter`를 가져와 문자열을 출력했는지는 공식 레퍼런스를 살펴보면 찾을 수 있습니다.
+
+우선 컨트롤러 컴포넌트를 만들때 사용하는 것들에 대해 알아보면서 설명하겠습니다.
 
 #### Request Mapping
-가장 먼저 [`@RequestMapping`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-requestmapping)은 선언된 함수가 어떻게 웹 요청을 처리할지 설정할 수 있습니다. 예를 들어, 특정 URL, 파라미터, 헤더, 미디어 타입에 따라 처리할 요청을 구분할 수 있습니다. 위 예제에서 선언된 `@GetMapping`은 이 @RequestMapping에 대해 HTTP 메소드에 따라 확장한 어노테이션 중 하나입니다.
+가장 먼저 [`@RequestMapping`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-requestmapping)은 선언된 핸들러 함수가 어떻게 웹 요청을 처리할지 결정할 수 있습니다. 예를 들어, 특정 URL, 파라미터, 헤더, 미디어 타입에 따라 처리할 요청을 구분할 수 있습니다. 위 예제에서 선언된 `@GetMapping`은 이 @RequestMapping에 대해 HTTP 메소드에 따라 확장한 어노테이션 중 하나입니다.
+
+- @GetMapping
+- @PostMapping
+- @PutMapping
+- @DeleteMapping
 
 만약, 컨트롤러에서 처리하는 함수가 여러가지 HTTP 메소드를 지원하는 경우가 아니라면 HTTP 메소드에 따라 확장된 어노테이션을 선언하는 것이 가독성에 이점이 있습니다.
 
 #### Handler Methods
-컨트롤러에 선언된 핸들러 함수는 여러가지 [매개변수](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-arguments)를 받을 수 있습니다. 위 예제 코드에서 HttpServletRequest와 HttpServletResponse도 매개변수로 받을 수 있는 클래스 중 하나입니다. 
+컨트롤러에 선언된 핸들러 함수는 여러가지 [매개변수](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-arguments)를 지정할 수 있습니다.
+
+위 예제 코드에서 HttpServletRequest와 HttpServletResponse도 매개변수로 받을 수 있는 클래스 중 하나입니다. 
 
 #### Return Values
-위 예제 코드에서 home() 핸들러 함수가 void 형식을 반환한 이유는 컨트롤러에 선언된 핸들러 함수가 반환할 수 있는 유형이 정해져있기 때문입니다.
+앞서 핸들러 함수에서 void 형식을 반환한 이유를 여기서 확인할 수 있습니다. 컨트롤러의 핸들러 함수는 반환할 수 있는 형식이 정해져 있습니다. 예를 들어, 컨트롤러에 선언된 핸들러 함수가 [반환하는 유형](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-return-types) 중 `String`은 문자열을 응답하는 것이 아니라 스프링 프레임워크에서 사용하는 `뷰(View)`라는 응답 객체의 이름을 지정하는 것으로 정해져있습니다. 
 
-예를 들어, 컨트롤러에 선언된 핸들러 함수가 [반환하는 유형](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-return-types) 중 `String`은 문자열을 응답하는 것이 아닌 뷰 이름을 지정하는 것으로 정해져있습니다. 
-
-따라서, "Hello World"라는 문자열을 응답으로 출력 위하여 String 형식으로 반환하였다면 디스패처 서블릿을 응답을 위해 Hello Wolrd라는 이름을 가진 뷰(응답 객체)를 찾게됩니다. 결국 요청을 처리할 수 없다고 판단하고 응답을 받지 못하게 됩니다.
+따라서, "Hello World"라는 문자열을 응답으로 출력 위하여 String 형식으로 반환하였다면 디스패처 서블릿은 응답을 위해 Hello Wolrd라는 이름을 가진 뷰를 찾게됩니다. 디스패처 서블릿은 결국 요청을 처리할 수 없다고 판단합니다.
 
 다음 처럼 말이죠.
 ```java
@@ -215,80 +222,20 @@ public String home(HttpServletRequest request, HttpServletResponse response) thr
 경고: No mapping for GET /Hello World
 ```
 
-스프링 웹 MVC는 핸들러 함수에서 반환한 유형에 따라 올바른 응답을 하기 위해서 `ViewResolver` 인터페이스를 통해 응답 객체로 변환됩니다. 기본적으로 ViewResolver에 대한 설정이 없으면 InternalResourceViewResolver를 사용합니다.
+스프링 웹 MVC는 핸들러 함수에서 반환하는 유형에 따라 응답해야하는 것을 구분하기 위하여 `ViewResolver` 인터페이스를 통해 수행합니다. 기본적으로 ViewResolver에 대한 설정이 존재하지 않으면 `InternalResourceViewResolver`를 사용하게 됩니다. 여기서 확인할 수 있는 점은 우리가 원하는 형식으로 응답하기 위해서는 ViewResolver에 대한 설정을 해야한다는 것입니다.
 
-여기서 우리는 컨트롤러를 통해 요청을 처리하고 컨트롤러의 핸들러 함수가 반환하는 형식에 따라 응답 유형이 다를 수 있다는 것을 알았습니다.
+다음의 ViewResolver에 대해서 찾아보시기를 추천합니다.
 
-## Logging System
-스프링 프레임워크 기반의 웹 애플리케이션은 실행하였지만 어떻게 동작하고 있는지 궁금하고 출력되는 로그가 정해져있어 답답하기도 합니다. 스프링 프레임워크는 [`spring-jcl`](https://mvnrepository.com/artifact/org.springframework/spring-jcl) 모듈을 통해 `SLF4J`와 같은 다양한 로깅에 대한 추상화를 지원합니다. 
-
-따라서, `slf4j-api` 의존성을 추가하여 스프링 프레임워크에 대한 로그 출력을 활성화할 수 있습니다. 
-```groovy
-implementation 'org.slf4j:slf4j-api:1.7.30'
-// implementation 'org.slf4j:slf4j-simple:1.7.30'
-```
-
-SLF4J는 로거 추상화로 구현체를 아직 추가하지 않았기 때문에 다음과 같은 로그가 출력됩니다.
-```java
-9월 12, 2020 4:21:31 오후 org.apache.jasper.servlet.TldScanner scanJars
-정보: At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
-SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-```
-
-가장 기본적인 `slf4j-simple` 의존성을 추가하면 정상적으로 스프링 프레임워크에 대한 로그가 출력됩니다.
-
-### Logback
-[`Logback`](http://logback.qos.ch/)은 여러가지 SLF4J 구현체 중 하나로 Log4j를 확장한 프로젝트로 Logback을 추가하여 스프링 프레임워크에 대한 로그를 출력하겠습니다.
-
-다음 `logback-classic` 의존성을 추가합니다.
-```groovy
-implementation 'ch.qos.logback:logback-classic:1.2.3'
-```
-
-클래스패스에 `logback.xml` 파일을 생성하고 다음처럼 로그백에 대한 설정을 기술합니다.
-```java logback.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %cyan(%logger{25}\(%line\)) - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <root level="debug">
-        <appender-ref ref="STDOUT"/>
-    </root>
-</configuration>
-```
-
-이제 애플리케이션 실행 시 스프링 프레임워크에 대한 로그가 출력됩니다. 
-```sh
-2020-09-12 16:58:11 [main] INFO  o.s.w.s.DispatcherServlet(525) - Initializing Servlet 'dispatcher'
-2020-09-12 16:58:11 [main] DEBUG o.s.w.c.s.AnnotationConfigWebApplicationContext(596) - Refreshing WebApplicationContext for namespace 'dispatcher-servlet'
-2020-09-12 16:58:11 [main] DEBUG o.s.w.c.s.AnnotationConfigWebApplicationContext(217) - Registering component classes: [class com.example.demo.config.WebConfig]
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalConfigurationAnnotationProcessor'
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerProcessor'
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerFactory'
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalAutowiredAnnotationProcessor'
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalCommonAnnotationProcessor'
-2020-09-12 16:58:11 [main] DEBUG o.s.u.c.s.UiApplicationContextUtils(85) - Unable to locate ThemeSource with name 'themeSource': using default [org.springframework.ui.context.support.DelegatingThemeSource@7741507c]
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'webConfig'
-2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'homeController'
-2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping(351) - 1 mappings in 'org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping'
-2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter(611) - ControllerAdvice beans: none
-2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver(294) - ControllerAdvice beans: none
-2020-09-12 16:58:11 [main] DEBUG o.s.w.s.DispatcherServlet(542) - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2020-09-12 16:58:11 [main] INFO  o.s.w.s.DispatcherServlet(547) - Completed initialization in 165 ms
-```
-
-이제 우리는 애플리케이션에서 인터페이스를 통해 로그를 출력할 수 있게 되었습니다. 이제 애플리케이션 개발자가 할일은 요구사항에 따라 logback.xml을 작성하는 일입니다.
+- [ContentNegotiatingViewResolver](https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html)
+- [InternalResourceViewResolver](https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html)
+- [FreeMarkerViewResolver](https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/freemarker/FreeMarkerViewResolver.html)
 
 ## Template Engine
-웹 애플리케이션의 목표는 웹 요청을 처리하여 응답하는 것입니다. 그리고 HTML 형식으로 응답하는 것은 중요합니다. 스프링 웹 MVC는 기본적으로 [`InternalResourceViewResolver`](https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html)을 사용합니다. InternalResourceViewResolver는 UrlBasedViewResolver를 확장한 클래스로 Servlet이나 JSP와 같은 `InternalResourceView` 또는 `JstlView`를 지원하게 됩니다.
+위에서 언급한 ViewResolver 중 `FreeMarkerViewResolver`는 프리마커 템플릿 엔진을 사용하여 HTML을 응답하기 위한 설정을 할 때 사용할 수 있습니다. 웹 애플리케이션의 목표는 웹 요청을 처리하여 응답하는 것이며 HTML 형식으로 응답하는 것은 중요한 부분입니다.
 
-예를 들어, 다음과 같이 컨트롤러 핸들러 함수에서 index라는 뷰 이름을 반환합니다.
+스프링 웹 MVC에서 기본적으로 [`InternalResourceViewResolver`](https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html)을 사용하여 뷰를 응답한다고 하였습니다. 이 InternalResourceViewResolver는 UrlBasedViewResolver를 확장한 클래스로 Servlet이나 JSP와 같은 `InternalResourceView` 또는 `JstlView`를 응답으로 사용하게 됩니다.
+
+예를 들어, 다음과 같이 컨트롤러 핸들러 함수에서 `index`라는 뷰 이름을 반환합니다.
 ```java
 @Controller
 public class HomeController {
@@ -300,6 +247,9 @@ public class HomeController {
 ```
 
 그러면 InternalResourceViewResolver에 의해 InternalResourceView로 판단하고 `/index`라는 경로로 요청이 `포워딩` 됩니다.
+
+> 여기서 포워딩 되는 이유는 InternalResourceViewResolver가 UrlBasedViewResolver를 기반으로 하기 때문입니다.
+
 ```sh
 2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.DispatcherServlet(91) - GET "/", parameters={}
 2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping(414) - Mapped to com.example.demo.controller.HomeController#index(HttpServletRequest, HttpServletResponse)
@@ -311,18 +261,19 @@ public class HomeController {
 2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.DispatcherServlet(1131) - Completed 404 NOT_FOUND
 ```
 
-결과적으로 우리는 클래스패스에 생성한 index.html을 응답할 수 없습니다.
+결과적으로 우리는 클래스패스에 HTML 파일을 생성하였다고 해서 응답할 수 없습니다.
 
 ### FreeMarkerViewResolver
-대부분의 개발자가 JSP와 같은 뷰 기술에 익숙할 수 있지만 스프링 프레임워크에서는 JSP를 선호하지 않습니다. 그래서 스프링 부트 프로젝트에서는 기본적으로 JSP를 뷰로 지원하지 않습니다. [`FreeMarkerViewResolver`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/freemarker/FreeMarkerViewResolver.html)는 `FreeMarkerView` 클래스를 뷰로 응답할 수 있도록 지원합니다. 따라서, `FreeMarker Template Engine`을 사용하여 index.html을 뷰로 응답할 수 있습니다.
+스프링 프레임워크 애플리케이션을 개발하는 대부분의 개발자들은 JSP를 사용해왔습니다. 그러나 최근에는 JSP 보다는 Thymeleaf 또는 FreeMarker 같은 템플릿 엔진을 선호합니다. 그래서 스프링 부트 프로젝트에서는 기본적으로 JSP에 대한 의존성을 지원하지 않고 있습니다. JSP를 원하는 개발자들이 서운해할 수 있지만 프리마커 템플릿 엔진을 사용하여 HTML을 응답해보도록 하겠습니다.
+
+[`FreeMarkerViewResolver`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/freemarker/FreeMarkerViewResolver.html)는 `FreeMarkerView` 클래스를 뷰로 응답할 수 있도록 지원합니다. 즉, 프리마커 템플릿 엔진을 사용하여 웹 요청을 HTML 형식으로 응답할 수 있게 되는 것입니다.
 
 먼저, 프리마커 템플릿 엔진을 사용하기 위해 [`freemarker`](https://mvnrepository.com/artifact/org.freemarker/freemarker/2.3.30)와 `spring-context-support` 의존성을 추가합니다.
-```groovy
+
+```groovy build.gradle
 implementation 'org.freemarker:freemarker:2.3.30'
 implementation 'org.springframework:spring-context-support:5.2.8.RELEASE'
 ```
-
-
 
 서블릿 컨텍스트 메타정보 클래스에 `FreeMarkerViewResolver`와 `FreeMarkerConfigurer`를 빈으로 등록합니다.
 ```java
@@ -366,7 +317,7 @@ public class WebConfig {
 ```
 
 #### Model
-FreeMarker도 JSP처럼 Model에 등록된 속성을 표시할 수 있습니다.
+FreeMarker도 템플릿 엔진이므로 Model에 값을 넣어 표시할 수 있습니다.
 
 ```java
 @GetMapping("/")
@@ -389,8 +340,70 @@ public String index(HttpServletRequest request, HttpServletResponse response, Mo
 </html>
 ```
 
-이제 할일은 [FreeMarker Template](https://freemarker.apache.org/docs/dgui_template_overallstructure.html) 방식에 따라 템플릿을 구성하면 됩니다.
+## Logging System
+스프링 프레임워크는 [`spring-jcl`](https://mvnrepository.com/artifact/org.springframework/spring-jcl) 모듈을 통해 `SLF4J`와 같은 다양한 로깅에 대한 추상화를 지원합니다. 따라서, 스프링 프레임워크 기반의 웹 애플리케이션에서 로그 출력을 위한 기능은 쉽게 적용할 수 있습니다.
+
+`slf4j-api` 의존성을 추가합니다.
+```groovy build.gradle
+implementation 'org.slf4j:slf4j-api:1.7.30'
+// implementation 'org.slf4j:slf4j-simple:1.7.30'
+```
+
+SLF4J는 로거 추상화로 구현체를 아직 추가하지 않았기 때문에 다음과 같은 로그가 출력됩니다.
+```java
+9월 12, 2020 4:21:31 오후 org.apache.jasper.servlet.TldScanner scanJars
+정보: At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+```
+
+가장 기본적인 `slf4j-simple` 의존성을 추가하면 정상적으로 스프링 프레임워크에 대한 로그가 출력됩니다.
+
+### Logback
+slf4j-simple로 출력되는 로그 보다는 [`Logback`](http://logback.qos.ch/)과 같은 SLF4J 구현체를 사용하는 것이 좋습니다.
+
+다음 `logback-classic` 의존성을 추가합니다.
+```groovy build.gradle
+implementation 'ch.qos.logback:logback-classic:1.2.3'
+```
+
+클래스패스에 `logback.xml` 파일을 생성하고 로그백으로 로그를 출력하기 위한 설정을 기술합니다.
+```java logback.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %cyan(%logger{25}\(%line\)) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
+```
+
+이제 애플리케이션을 실행하면 웹 애플리케이션에 대한 로그가 다음과 같이 출력됩니다.
+```
+2020-09-12 16:58:11 [main] INFO  o.s.w.s.DispatcherServlet(525) - Initializing Servlet 'dispatcher'
+2020-09-12 16:58:11 [main] DEBUG o.s.w.c.s.AnnotationConfigWebApplicationContext(596) - Refreshing WebApplicationContext for namespace 'dispatcher-servlet'
+2020-09-12 16:58:11 [main] DEBUG o.s.w.c.s.AnnotationConfigWebApplicationContext(217) - Registering component classes: [class com.example.demo.config.WebConfig]
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalConfigurationAnnotationProcessor'
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerProcessor'
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.event.internalEventListenerFactory'
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalAutowiredAnnotationProcessor'
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'org.springframework.context.annotation.internalCommonAnnotationProcessor'
+2020-09-12 16:58:11 [main] DEBUG o.s.u.c.s.UiApplicationContextUtils(85) - Unable to locate ThemeSource with name 'themeSource': using default [org.springframework.ui.context.support.DelegatingThemeSource@7741507c]
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'webConfig'
+2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean 'homeController'
+2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping(351) - 1 mappings in 'org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping'
+2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter(611) - ControllerAdvice beans: none
+2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver(294) - ControllerAdvice beans: none
+2020-09-12 16:58:11 [main] DEBUG o.s.w.s.DispatcherServlet(542) - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2020-09-12 16:58:11 [main] INFO  o.s.w.s.DispatcherServlet(547) - Completed initialization in 165 ms
+```
 
 ---
 
-이번 글을 통해 스프링 프레임워크 기반의 웹 애플리케이션을 만들고 실행하는 법에 대해서 알게 되었습니다. 스프링 MVC 모듈은 [`MVC Configuration`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-config)을 위한 클래스를 제공합니다. 다음 글에서는 MVC Configuration을 통해 스프링 웹 애플리케이션에 좀 더 확장된 기능을 적용해보도록 하겠습니다.
+이번 글을 통해 스프링 프레임워크 기반의 웹 애플리케이션을 만들고 실행하는 법에 대해서 알게 되었습니다. 스프링 MVC 모듈은 [`MVC Configuration`](https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-config)을 위한 클래스를 추가적으로 제공합니다. 다음 글에서는 MVC Configuration을 통해 스프링 프레임워크 기반의 웹 애플리케이션에 대한 기능을 좀 더 확장해보겠습니다.
