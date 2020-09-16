@@ -6,7 +6,6 @@ categories:
 tags:
 - 스프링 프레임워크
 - 스프링 튜토리얼
-description: 잠만보와 함께하는 스프링 프레임워크 기반의 웹 애플리케이션
 ---
 
 ## Overview
