@@ -71,7 +71,7 @@ font:
   # Global font settings used for all elements inside <body>.
   global:
     external:                true
-    family:                  Roboto
+    family:                  Noto Sans KR
 
   # Font settings for site title (.site-title).
   title:
@@ -81,12 +81,12 @@ font:
   # Font settings for headlines (<h1> to <h6>).
   headings:
     external:                true
-    family:                  yg-jalnan
+    family:                  Binggrae-Bold
 
   # Font settings for posts (.post-body).
   posts:
     external:                true
-    family:                  Noto Sans KR
+    # family:                  Noto Sans KR
 
   # Font settings for <code> and code blocks.
   codes:
@@ -94,7 +94,7 @@ font:
     family:                  Jetbrains Mono
 
 avatar:
-    url:                     https://avatars1.githubusercontent.com/u/17937604?s=460&v=4
+    url:                     https://avatars2.githubusercontent.com/u/62161703?s=400&u=5186b79d98a2f76a985c2694b11fee2aa72831ee&v=4
     rounded:                 true
     rotated:                 false
 

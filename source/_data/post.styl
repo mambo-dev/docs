@@ -9,15 +9,7 @@
         margin-bottom: 0;
         padding-bottom: 2rem;
         border-bottom: 1.5px dashed $grey;
-
-        .post-title {
-            font-family: 'yg-jalnan';
-        }
-
-        .post-description {
-            font-family: 'Binggrae-Bold';
-        }
-
+        
         .post-meta {
             margin-bottom: 0;
         }
@@ -43,10 +35,6 @@
         }
         .post-header {
             margin: 10px 0;
-
-            .post-title {
-               font-family: 'Noto Sans KR';
-            }
         }
     }
 }
@@ -77,16 +65,22 @@
           max-height: 200px;
         }
     }
+    
+    *:not(pre) > code {
+        font-family: 'Noto Sans KR';
+    }
 
     code {
       color: $red;
-      background-color: $lightgrey;
+      background-color: $white;
+      border: 1px solid $grey;
+      padding: 2px 6px;
     }
     
     a {
+        color: $green;
         code {
-            border: 1px solid $grey;
-            
+            color: $green;
             &:hover {
                 text-decoration: underline;
             }
