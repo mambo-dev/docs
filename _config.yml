@@ -47,7 +47,7 @@ pagination_dir:                  page
 deploy:
   type:                          git
   repo:                          https://__GITHUB_TOKEN__@github.com/mambo-docs/mambo-docs.github.io.git
-  branch:                        master
+  branch:                        main
 
 article_emoji:
   full:                          true
