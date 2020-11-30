@@ -3,6 +3,8 @@
 <meta name="theme-color" content="{{ theme.android_chrome_color }}">
 <meta name="generator" content="Hexo {{ hexo_version }}">
 
+{{ next_pre() }}
+
 {%- if theme.favicon.apple_touch_icon %}
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for(theme.favicon.apple_touch_icon) }}">
 {%- endif %}
@@ -18,9 +20,6 @@
 {%- if theme.favicon.android_manifest %}
   <link rel="manifest" href="{{ url_for(theme.favicon.android_manifest) }}">
 {%- endif %}
-{%- if theme.favicon.ms_browserconfig %}
-  <meta name="msapplication-config" content="{{ url_for(theme.favicon.ms_browserconfig) }}">
-{%- endif %}
 
 {%- if theme.disable_baidu_transformation %}
   <meta http-equiv="Cache-Control" content="no-transform">
@@ -28,9 +27,6 @@
 {%- endif %}
 {%- if theme.google_site_verification %}
   <meta name="google-site-verification" content="{{ theme.google_site_verification }}">
-{%- endif %}
-{%- if theme.naver_site_verification %}
-  <meta name="naver-site-verification" content="{{ theme.naver_site_verification }}">
 {%- endif %}
 {%- if theme.bing_site_verification %}
   <meta name="msvalidate.01" content="{{ theme.bing_site_verification }}">
@@ -56,9 +52,9 @@
   <link rel="stylesheet" href="{{ theme.vendors.fancybox_css }}">
 {%- endif %}
 
-{%- if theme.pace.enable %}
-  <link rel="stylesheet" href="{{ theme.vendors.pace_css }}">
-  <script src="{{ theme.vendors.pace }}"></script>
+{%- if theme.nprogress.enable %}
+  <link rel="stylesheet" href="{{ theme.vendors.nprogress_css }}">
+  <script src="{{ theme.vendors.nprogress_js }}"></script>
 {%- endif %}
 
 {{ next_config() }}
