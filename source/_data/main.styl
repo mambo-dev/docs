@@ -1,6 +1,14 @@
 .main {
+  
+  .header {
+    +tablet-mobile() {
+      padding-right: 0;
+    }  
+  }
+
   .main-inner {
-      max-width: 1120px;
-      margin-right: auto;
+    +mobile() {
+      padding: 5px 0 0 0;
+    }
   }
 }
