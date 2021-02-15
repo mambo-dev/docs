@@ -40,11 +40,10 @@ favicon:
   small: /images/favicon/favicon-16x16.png
   medium: /images/favicon/favicon-32x32.png
   apple_touch_icon: /images/favicon/apple-touch-icon.png
-  safari_pinned_tab: /images/favicon/logo.svg
+  safari_pinned_tab: /images/favicon/favicon.ico
   #android_manifest: /images/manifest.json
   #ms_browserconfig: /images/browserconfig.xml
-
-# Custom Logo (Warning: Do not support scheme Mist)
+  
 custom_logo: #/images/favicon/android-chrome-192x192.png
 
 menu_settings:
@@ -71,7 +70,7 @@ font:
   # Global font settings used for all elements inside <body>.
   global:
     external:                true
-    family:                  Noto Sans KR
+    family:                  Roboto, Noto Sans KR
 
   # Font settings for site title (.site-title).
   title:
@@ -94,13 +93,19 @@ font:
     family:                  Jetbrains Mono
 
 avatar:
-    url:                     https://avatars2.githubusercontent.com/u/62161703?s=400&u=5186b79d98a2f76a985c2694b11fee2aa72831ee&v=4
+    url:                     https://avatars1.githubusercontent.com/u/17937604?s=460&v=4
     rounded:                 true
     rotated:                 false
 
 pace:
     enable:                  true
     theme:                   center-atom
+
+excerpt:
+  depth: 10
+  excerpt_excludes: []
+  more_excludes: []
+  hideWholePostExcerpts: true
 
 # ---------------------------------------------------------------
 # Third Party Plugins & Services Settings
@@ -118,7 +123,7 @@ safari_rainbow:              true
 
 custom_scrollbar:            true
 
-site_state:                  false
+site_state:                  true
 
 social:
     GitHub:                  https://github.com/kdevkr || fab fa-github
@@ -152,16 +157,18 @@ sidebar:
 
 codeblock:
   # Code Highlight theme
-  # All available themes: https://theme-next.js.org/highlight/
+  # See: https://github.com/highlightjs/highlight.js/tree/master/src/styles
+  # darcula | github-gist | atom-one-dark
   theme:
     light: darcula
     dark: tomorrow-night
+  # See: https://github.com/PrismJS/prism/tree/master/themes
   prism:
     light: prism
     dark: prism-dark
   # Add copy button on codeblock
   copy_button:
-    enable: false
+    enable: true
     # Available values: default | flat | mac
     style: flat
 
@@ -246,40 +253,10 @@ post_meta:
     enable: false
     another_day: true
   categories: true
-
-symbols_count_time:
-  separated_meta: true
-  item_text_total: false
-
-related_posts:
-  enable: false
-  title: # Custom header, leave empty to use the default one
-  display_in_home: false
-  params:
-    maxCount: 5
-
-reward_settings:
-  # If true, a donate button will be displayed in every article by default.
-  enable: false
-  animation: false
-  #comment: Buy me a coffee
-
-# Bookmark Support
-bookmark:
-  enable: false
-  # Customize the color of the bookmark.
-  color: "#222"
-  # If auto, save the reading progress when closing the page or clicking the bookmark-icon.
-  # If manual, only save it by clicking the bookmark-icon.
-  save: auto
-
-exif:
-  enable: true
-  tags:
-    FocalLength: "{value}mm"
-    FNumber: "f/{value}"
-    ExposureTime: "{value}s"
-
+  
 disable_baidu_transformation: true
 canonical: true
 seo: true
+
+google_site_verification:        LMcddVW6xLBS7X1htGQ3duOIEmVp4ljku8sd3UuIcBg
+naver_site_verification:         967670e7891eb52e115709ce4890e2e8f576a1e5
