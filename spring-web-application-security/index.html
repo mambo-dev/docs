@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/docs/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/docs/images/favicon/favicon-16x16.png">
+  <link rel="mask-icon" href="/docs/images/favicon/favicon.ico" color="#222">
+  <meta name="google-site-verification" content="LMcddVW6xLBS7X1htGQ3duOIEmVp4ljku8sd3UuIcBg">
+
+<link rel="stylesheet" href="/docs/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic%7CNoto+Sans+KR:300,300italic,400,400italic,700,700italic%7CBinggrae-Bold:300,300italic,400,400italic,700,700italic%7CJetbrains+Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mambo-dev.github.io","root":"/docs/","images":"/docs/images","scheme":"Gemini","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"width":240,"scrollpercent":true,"b2t":true},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+<meta name="description" content="Overview본 글은 스프링 시큐리티 Version 5.3.4.RELEASE 문서와 초보가 이해하는 스프링 시큐리티를 기반으로 작성하였습니다. Spring Security보안 전문가가 아니고서야 일반 개발자가 애플리케이션에 대한 보안 기능을 적용하는 것은 쉽지 않습니다. 스프링 시큐리티는 스프링 프레임워크를 기반으로 애플리케이션을 개발하는 개발자들이 쉽게">
+<meta property="og:type" content="article">
+<meta property="og:title" content="스프링 웹 애플리케이션 - 보안">
+<meta property="og:url" content="https://mambo-dev.github.io/spring-web-application-security/index.html">
+<meta property="og:site_name" content="Mambo Docs">
+<meta property="og:description" content="Overview본 글은 스프링 시큐리티 Version 5.3.4.RELEASE 문서와 초보가 이해하는 스프링 시큐리티를 기반으로 작성하였습니다. Spring Security보안 전문가가 아니고서야 일반 개발자가 애플리케이션에 대한 보안 기능을 적용하는 것은 쉽지 않습니다. 스프링 시큐리티는 스프링 프레임워크를 기반으로 애플리케이션을 개발하는 개발자들이 쉽게">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://docs.spring.io/spring-security/site/docs/5.3.4.RELEASE/reference/html5/images/servlet/architecture/filterchainproxy.png">
+<meta property="og:image" content="https://docs.spring.io/spring-security/site/docs/5.3.4.RELEASE/reference/html5/images/servlet/authentication/unpwd/usernamepasswordauthenticationfilter.png">
+<meta property="article:published_time" content="2020-09-18T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-16T12:54:23.977Z">
+<meta property="article:author" content="Mambo">
+<meta property="article:tag" content="스프링 프레임워크">
+<meta property="article:tag" content="스프링 튜토리얼">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://docs.spring.io/spring-security/site/docs/5.3.4.RELEASE/reference/html5/images/servlet/architecture/filterchainproxy.png">
+
+
+<link rel="canonical" href="https://mambo-dev.github.io/spring-web-application-security/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'ko'
+  };
+</script>
+<title>스프링 웹 애플리케이션 - 보안 | Mambo Docs</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-93954323-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+  
+  <script data-ad-client="ca-pub-9304279418886145" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/docs/atom.xml" title="Mambo Docs" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/docs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Mambo Docs</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Mambo's development guide</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/docs/" rel="section"><i class="fas fa-home fa-fw"></i>홈</a></li>
+        <li class="menu-item menu-item-archives"><a href="/docs/archives/" rel="section"><i class="fas fa-archive fa-fw"></i>아카이브<span class="badge">13</span></a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-가이드"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 가이드</a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-이야기"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%9D%B4%EC%95%BC%EA%B8%B0/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 이야기</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Security"><span class="nav-number">2.</span> <span class="nav-text">Spring Security</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-Architecture"><span class="nav-number">2.1.</span> <span class="nav-text">Security Architecture</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#springSecurityFilterChain"><span class="nav-number">2.2.</span> <span class="nav-text">springSecurityFilterChain</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security-Configuration"><span class="nav-number">3.</span> <span class="nav-text">Security Configuration</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Authentication-Mechanisms"><span class="nav-number">3.1.</span> <span class="nav-text">Authentication Mechanisms</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Configure-HttpSecurity"><span class="nav-number">3.2.</span> <span class="nav-text">Configure HttpSecurity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Configure-WebSecurity"><span class="nav-number">3.3.</span> <span class="nav-text">Configure WebSecurity</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Mambo"
+      src="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+  <p class="site-author-name" itemprop="name">Mambo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/docs/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">카테고리</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">태그</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kdevkr" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kdevkr" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kdevkr@gmail.com" title="E-Mail → mailto:kdevkr@gmail.com" rel="noopener" target="_blank"><i class="fas fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" class="cc-opacity" rel="noopener" target="_blank"><img src="/docs/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="ko">
+    <link itemprop="mainEntityOfPage" href="https://mambo-dev.github.io/spring-web-application-security/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+      <meta itemprop="name" content="Mambo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mambo Docs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          스프링 웹 애플리케이션 - 보안
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 2020-09-18 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-18T00:00:00Z">2020-09-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" itemprop="url" rel="index"><span itemprop="name">스프링 프레임워크 가이드</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>본 글은 스프링 시큐리티 Version <code>5.3.4.RELEASE</code> 문서와 <a target="_blank" rel="noopener" href="https://okky.kr/article/382738"><code>초보가 이해하는 스프링 시큐리티</code></a>를 기반으로 작성하였습니다.</p>
+<h2 id="Spring-Security"><a href="#Spring-Security" class="headerlink" title="Spring Security"></a>Spring Security</h2><p>보안 전문가가 아니고서야 일반 개발자가 애플리케이션에 대한 보안 기능을 적용하는 것은 쉽지 않습니다. 스프링 시큐리티는 스프링 프레임워크를 기반으로 애플리케이션을 개발하는 개발자들이 쉽게 보안을 적용할 수 있는 매커니즘을 제공합니다. </p>
+<h3 id="Security-Architecture"><a href="#Security-Architecture" class="headerlink" title="Security Architecture"></a>Security Architecture</h3><p>스프링 프레임워크 기반의 애플리케이션에 스프링 시큐리티를 적용하기에 앞서 스프링 시큐리티의 기반이 되는 보안 아키텍처에 대해 알아야합니다. 저는 이전에 <a target="_blank" rel="noopener" href="https://okky.kr/article/382738">초보가 이해하는 스프링 시큐리티</a>에서 인증과 권한에 개념을 설명하였습니다. </p>
+<blockquote>
+<p>인증이란 애플리케이션의 작업을 수행할 수 있는 주체(사용자)라고 주장하는 것이며 권한은 인증된 주체가 애플리케이션의 동작을 수행할 수 있도록 허락하는 것이다.</p>
+</blockquote>
+<p>따라서, 스프링 시큐리티의 보안 아키텍처에서 애플리케이션 사용자는 애플리케이션에 대한 작업을 수행할 수 있는 주체라고 인증하는 것, 애플리케이션은 인증된 주체에 대하여 권한을 제어하는 것을 통해 보안 기능을 적용합니다.</p>
+<h3 id="springSecurityFilterChain"><a href="#springSecurityFilterChain" class="headerlink" title="springSecurityFilterChain"></a>springSecurityFilterChain</h3><p>스프링 시큐리티는 <code>springSecurityFilterChain</code>라는 이름의 특별한 필터를 통해 보안을 적용합니다. <code>@EnableWebSecurity</code>을 구성 메타정보 클래스에 선언하면 <code>springSecurityFilterChain</code> 이름의 필터가 빈으로 등록됩니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>그리고 이 보안 필터를 다른 필터가 수행되기 이전에 처리될 수 있도록 지원하는 DelegatingFilterProxy를 등록하기 위하여 AbstractSecurityWebApplicationInitializer를 클래스 패스에 생성합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityApplicationInitializer</span> <span class="keyword">extends</span> <span class="title">AbstractSecurityWebApplicationInitializer</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 스프링 프레임워크 기반의 웹 애플리케이션을 실행하면 기본적인 웹 보안이 적용됩니다. 따라서, <a target="_blank" rel="noopener" href="http://localhost:8080/">http://localhost:8080</a> 으로 접근하게 되면 접근이 금지되고 인증을 위한 페이지인 <code>/login</code>으로 이동됩니다.</p>
+<p><img data-src="https://docs.spring.io/spring-security/site/docs/5.3.4.RELEASE/reference/html5/images/servlet/architecture/filterchainproxy.png"></p>
+<p>위 그림은 FilterChainProxy에 의해 springSecurityFilterChain으로 필터 과정이 위임되는 것을 보여주고 있습니다. 앞선 요청은 위 과정에 의해 springSecurityFilterChain에 등록된 DefaultLoginPageGeneratingFilter에 의해 인증을 위한 로그인 페이지로 이동된 것입니다.</p>
+<h4 id="Filter-Debugging"><a href="#Filter-Debugging" class="headerlink" title="Filter Debugging"></a>Filter Debugging</h4><p>springSecurityFilterChain에 의해 수행되는 필터와 처리되는 순서를 알고 싶다면 @EnableWebSecurity를 선언할 때 디버그 모드를 활성화하면 됩니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity(debug = true)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>디버그 모드가 활성화되면 <code>Spring Security Debugger</code>에 의해 다음과 같이 요청 및 처리되는 필터 순서가 출력됩니다.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[http-nio-8080-exec-1] INFO  Spring Security Debugger(54) - </span><br><span class="line"></span><br><span class="line">************************************************************</span><br><span class="line"></span><br><span class="line">Request received for GET &#39;&#x2F;&#39;:</span><br><span class="line"></span><br><span class="line">org.springframework.session.web.http.SessionRepositoryFilter$SessionRepositoryRequestWrapper@353695df</span><br><span class="line"></span><br><span class="line">servletPath:&#x2F;</span><br><span class="line">pathInfo:null</span><br><span class="line">headers: </span><br><span class="line">host: localhost:8080</span><br><span class="line">connection: keep-alive</span><br><span class="line">cache-control: max-age&#x3D;0</span><br><span class="line">upgrade-insecure-requests: 1</span><br><span class="line">user-agent: Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;85.0.4183.121 Safari&#x2F;537.36</span><br><span class="line">accept: text&#x2F;html,application&#x2F;xhtml+xml,application&#x2F;xml;q&#x3D;0.9,image&#x2F;avif,image&#x2F;webp,image&#x2F;apng,*&#x2F;*;q&#x3D;0.8,application&#x2F;signed-exchange;v&#x3D;b3;q&#x3D;0.9</span><br><span class="line">sec-fetch-site: none</span><br><span class="line">sec-fetch-mode: navigate</span><br><span class="line">sec-fetch-user: ?1</span><br><span class="line">sec-fetch-dest: document</span><br><span class="line">accept-encoding: gzip, deflate, br</span><br><span class="line">accept-language: ko-KR,ko;q&#x3D;0.9,en-US;q&#x3D;0.8,en;q&#x3D;0.7</span><br><span class="line">cookie: SESSION&#x3D;YTE0ZTUxODUtMzg0NS00MGMwLWFkOGYtYzFiNDFmYjdkYTMy; io&#x3D;qmiiYVyd26T7GqDfAABF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Security filter chain: [</span><br><span class="line">  WebAsyncManagerIntegrationFilter</span><br><span class="line">  SecurityContextPersistenceFilter</span><br><span class="line">  HeaderWriterFilter</span><br><span class="line">  CsrfFilter</span><br><span class="line">  LogoutFilter</span><br><span class="line">  RequestCacheAwareFilter</span><br><span class="line">  SecurityContextHolderAwareRequestFilter</span><br><span class="line">  AnonymousAuthenticationFilter</span><br><span class="line">  SessionManagementFilter</span><br><span class="line">  ExceptionTranslationFilter</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">************************************************************</span><br></pre></td></tr></table></figure>
+
+<h2 id="Security-Configuration"><a href="#Security-Configuration" class="headerlink" title="Security Configuration"></a>Security Configuration</h2><p>스프링 프레임워크 기반의 웹 애플리케이션에 보안 기능이 적용되었습니다. 그러나, 적용된 보안은 애플리케이션이 요구하는 보안 사항이 아닐 수 있습니다. 그러므로 우리는 스프링 시큐리티의 보안 구성을 변경하여 우리만의 보안을 적용해야합니다.</p>
+<h3 id="Authentication-Mechanisms"><a href="#Authentication-Mechanisms" class="headerlink" title="Authentication Mechanisms"></a>Authentication Mechanisms</h3><p>먼저, 애플리케이션에 대한 인증 매커니즘을 구성하는 것부터 시작합니다. 가장 기본적인 인증 프로세스는 폼 로그인입니다. 다시 말해, 사용자 이름과 비밀번호를 제공받아 사용자를 인증하는 것입니다.</p>
+<p><img data-src="https://docs.spring.io/spring-security/site/docs/5.3.4.RELEASE/reference/html5/images/servlet/authentication/unpwd/usernamepasswordauthenticationfilter.png"></p>
+<p>위 그림은 스프링 시큐리티 공식 레퍼런스에서 제공하는 폼 로그인이 수행되는 과정을 설명하는 그림입니다. <code>springSecurityFilterChain</code>에 등록된 <code>UsernamePasswordAuthenticationFilter</code>에 의해 <code>UsernamePasswordAuthenticationToken</code>을 생성하여 <code>AuthenticationManager</code>에 의해 인증 여부를 판단하고 있습니다. 만약, 인증에 실패했다면 SecurityContextHolder가 초기화되고 AuthenticationFailureHandler가 호출되고 인증에 성공했다면 SecurityContextHolder에 인증 정보가 설정되고 AuthenticationSuccessHandler가 호출됩니다.</p>
+<p>다음은 DefaultLoginPageGeneratingFilter를 대신하여 폼 로그인을 구성하는 예시입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.formLogin(form -&gt; &#123;</span><br><span class="line">            form.loginPage(<span class="string">&quot;/login&quot;</span>)</span><br><span class="line">                .usernameParameter(<span class="string">&quot;id&quot;</span>)</span><br><span class="line">                .passwordParameter(<span class="string">&quot;password&quot;</span>);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>단, DefaultLoginPageGeneratingFilter이 등록되지 않으므로 <code>/login</code> 경로에 대한 컨트롤러 핸들러 함수를 등록하여야합니다.</p>
+<h4 id="In-Memory-Authentication"><a href="#In-Memory-Authentication" class="headerlink" title="In-Memory Authentication"></a>In-Memory Authentication</h4><p>메모리 기반 인증은 가장 간단한 인증 매커니즘입니다. <code>InMemoryUserDetailsManager</code>는 인증 정보를 메모리에 구성할 수 있도록 지원합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> UserDetailsService <span class="title">userDetailsService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    UserDetails admin = User.builder()</span><br><span class="line">            .username(<span class="string">&quot;admin&quot;</span>)</span><br><span class="line">            .password(<span class="string">&quot;$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW&quot;</span>)</span><br><span class="line">            .roles(<span class="string">&quot;ADMIN&quot;</span>)</span><br><span class="line">            .build();</span><br><span class="line"></span><br><span class="line">    InMemoryUserDetailsManager userDetailsManager = <span class="keyword">new</span> InMemoryUserDetailsManager(admin);</span><br><span class="line"></span><br><span class="line">    UserDetails user = User.builder()</span><br><span class="line">            .username(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">            .password(<span class="string">&quot;$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW&quot;</span>)</span><br><span class="line">            .roles(<span class="string">&quot;USER&quot;</span>)</span><br><span class="line">            .build();</span><br><span class="line">    userDetailsManager.createUser(user);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> userDetailsManager;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Database-Authentication"><a href="#Database-Authentication" class="headerlink" title="Database Authentication"></a>Database Authentication</h4><p><code>UserDetailsService</code> 구현체를 만들어서 저장소 기반의 인증 매커니즘을 구성할 수 있습니다. 스프링 시큐리티에는 메모리 기반 인증을 위한 <code>InMemoryUserDetailsManager</code> 또는 JDBC 기반 인증을 위한 <code>JdbcUserDetailsManager</code> 구현체를 제공합니다. 다만, JdbcUserDetailsManager을 위한 테이블 스키마가 정해져있으므로 직접 구성되는 데이터베이스 스키마에 따라 직접 <code>UserDetailsService</code> 구현체를 만드는 것이 좋습니다.</p>
+<p>UserDetailsService 구현체는 <code>UserDetails</code>를 반환함으로써 인증 정보를 제공합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDetailsService</span> </span>&#123;</span><br><span class="line">	<span class="function">UserDetails <span class="title">loadUserByUsername</span><span class="params">(String username)</span> <span class="keyword">throws</span> UsernameNotFoundException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>우리는 <code>loadUserByUsername()</code>을 오버라이딩하여 저장소에서 정보를 가져와 UserDetails를 반환하도록 코드를 작성하면 됩니다.</p>
+<h4 id="AuthenticationProvider"><a href="#AuthenticationProvider" class="headerlink" title="AuthenticationProvider"></a>AuthenticationProvider</h4><p>UserDetailsService 구현체에 의해 구성된 인증 매커니즘으로 인증을 수행되는 것에 궁금해할 수 있습니다. 스프링 시큐리티는 인증 매커니즘에 의해 인증을 수행하는 것을 <code>AuthenticationProvider</code> 구현체가 담당합니다. 구현체 중 하나인 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-security/site/docs/5.3.4.RELEASE/api/org/springframework/security/authentication/dao/DaoAuthenticationProvider.html"><code>DaoAuthenticationProvider</code></a>는 AuthenticationProvider 구현체로 UserDetailsService와 PasswordEncoder를 통해 인증을 수행하게 됩니다.</p>
+<h3 id="Configure-HttpSecurity"><a href="#Configure-HttpSecurity" class="headerlink" title="Configure HttpSecurity"></a>Configure HttpSecurity</h3><h4 id="Authorize-Requests"><a href="#Authorize-Requests" class="headerlink" title="Authorize Requests"></a>Authorize Requests</h4><p><code>ExpressionUrlAuthorizationConfigurer</code>는 URL 패턴에 대하여 보안을 적용할 수 있도록 지원합니다.</p>
+<p>다음은 모든 경로에 대해 인증 여부를 적용하는 예시입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.authorizeRequests().antMatchers(<span class="string">&quot;/**&quot;</span>).authenticated();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Session-Management"><a href="#Session-Management" class="headerlink" title="Session Management"></a>Session Management</h4><p><code>SessionManagementConfigurer</code>는 세션과 관련된 보안을 적용할 수 있도록 지원합니다. 예를 들어, 인증된 사용자의 세션이 생성되는 수를 제한하거나 <a target="_blank" rel="noopener" href="https://owasp.org/www-community/attacks/Session_fixation"><code>Session Fixation Attack</code></a>을 방지할 수 있습니다.</p>
+<p>다음은 사용자의 최대 세션 수를 제한하는 기능을 적용하는 예시입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.sessionManagement(session -&gt; &#123;</span><br><span class="line">            session.maximumSessions(<span class="number">1</span>);</span><br><span class="line">            session.sessionConcurrency(concurrency -&gt; &#123;</span><br><span class="line">                concurrency.maxSessionsPreventsLogin(<span class="keyword">true</span>);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Remember-Me"><a href="#Remember-Me" class="headerlink" title="Remember Me"></a>Remember Me</h4><p><code>RememberMeConfigurer</code>는 로그인 유지 기능을 적용할 수 있도록 지원합니다.</p>
+<p>다음은 메모리 기반의 로그인 유지 기능에 대한 예시입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.rememberMe()</span><br><span class="line">            .userDetailsService(userDetailsService())</span><br><span class="line">            .key(<span class="string">&quot;remember-me-key&quot;</span>)</span><br><span class="line">            .rememberMeCookieName(<span class="string">&quot;remember-me&quot;</span>)</span><br><span class="line">            .rememberMeParameter(<span class="string">&quot;remember-me&quot;</span>)</span><br><span class="line">            .tokenRepository(persistentTokenRepository())</span><br><span class="line">            .tokenValiditySeconds((<span class="keyword">int</span>) Duration.ofDays(<span class="number">1</span>).toSeconds());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> PersistentTokenRepository <span class="title">persistentTokenRepository</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> InMemoryTokenRepositoryImpl();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="Handling-Logouts"><a href="#Handling-Logouts" class="headerlink" title="Handling Logouts"></a>Handling Logouts</h4><p>보안 기능의 마무리는 애플리케이션에 인증된 주체에 대한 인증 정보를 제거하는 것입니다. 인증 정보를 제거하는 가장 기본적인 프로세스는 로그아웃을 수행하는 것입니다.</p>
+<p>기본적으로 springSecurityFilterChain에 등록되는 <code>LogoutPageGeneratingWebFilter</code>는 로그아웃 페이지를 제공합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        http.formLogin(Customizer.withDefaults());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Configure-WebSecurity"><a href="#Configure-WebSecurity" class="headerlink" title="Configure WebSecurity"></a>Configure WebSecurity</h3><h4 id="HttpFirewall"><a href="#HttpFirewall" class="headerlink" title="HttpFirewall"></a>HttpFirewall</h4><p>HttpFirewall은 잠재적 위험을 방지하는 기능을 제공합니다. <code>StrictHttpFirewall</code>는 기본적으로 적용되는 HttpFirewall 구현체로 잠재적인 위협이 있을만한 요청에 대한 URL 패턴이 있을 경우 요청이 거절될 수 있도록 합니다.</p>
+<p>다음은 StrictHttpFirewall을 통해 HTTP 메소드를 제한하는 예시입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> StrictHttpFirewall <span class="title">httpFirewall</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        StrictHttpFirewall firewall = <span class="keyword">new</span> StrictHttpFirewall();</span><br><span class="line">        firewall.setAllowedHttpMethods(Arrays.asList(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;POST&quot;</span>, <span class="string">&quot;PUT&quot;</span>, <span class="string">&quot;DELETE&quot;</span>));</span><br><span class="line">        <span class="keyword">return</span> firewall;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(WebSecurity web)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        web.httpFirewall(httpFirewall());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Ignoring-Security"><a href="#Ignoring-Security" class="headerlink" title="Ignoring Security"></a>Ignoring Security</h4><p><code>IgnoredRequestConfigurer</code>는 스프링 시큐리티에 의해 보안이 적용되지 않도록 설정할 수 있는 기능을 제공합니다.</p>
+<p>예를 들어, 다음과 같이 정적 리소스에 대한 보안을 수행하지 않을 수 있습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(WebSecurity web)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        web.ignoring().antMatchers(<span class="string">&quot;/images/**&quot;</span>, <span class="string">&quot;/css/**&quot;</span>, <span class="string">&quot;/js/**&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>스프링 프레임워크 기반의 웹 애플리케이션에 스프링 시큐리티 모듈을 통해 보안을 적용해보았습니다. 스프링 시큐리티는 이외에도 많은 보안 기능을 제공하지만 이 글을 통해 모두 다루어볼 수 없는 점 양해바랍니다.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC/" rel="tag"># 스프링 프레임워크</a>
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%8A%9C%ED%86%A0%EB%A6%AC%EC%96%BC/" rel="tag"># 스프링 튜토리얼</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/docs/how-does-springframework-bind-request-data/" rel="prev" title="스프링 프레임워크는 어떻게 요청 데이터를 바인딩할까?">
+                  <i class="fa fa-chevron-left"></i> 스프링 프레임워크는 어떻게 요청 데이터를 바인딩할까?
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/docs/spring-web-application-bom/" rel="next" title="스프링 웹 애플리케이션 - BOM(Bill of Materials)">
+                  스프링 웹 애플리케이션 - BOM(Bill of Materials) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="kdevkr/kdevkr.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+      <aside class="adsense-block">
+        <div class="adsense-block-wrapper">
+          <!-- AdSense Display -->
+          <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9304279418886145"
+              data-ad-slot="3137426518"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+          <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mambo</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/docs/js/utils.js"></script><script src="/docs/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>

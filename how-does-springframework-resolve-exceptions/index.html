@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/docs/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/docs/images/favicon/favicon-16x16.png">
+  <link rel="mask-icon" href="/docs/images/favicon/favicon.ico" color="#222">
+  <meta name="google-site-verification" content="LMcddVW6xLBS7X1htGQ3duOIEmVp4ljku8sd3UuIcBg">
+
+<link rel="stylesheet" href="/docs/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic%7CNoto+Sans+KR:300,300italic,400,400italic,700,700italic%7CBinggrae-Bold:300,300italic,400,400italic,700,700italic%7CJetbrains+Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mambo-dev.github.io","root":"/docs/","images":"/docs/images","scheme":"Gemini","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"width":240,"scrollpercent":true,"b2t":true},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+<meta name="description" content="Overview스프링 프레임워크 기반의 웹 애플리케이션에서 웹 요청을 처리하는 과정에서 발생하는 예외(Exception)에 대하여 어떻게 처리하는 걸까요? 이번 글에서는 스프링 프레임워크가 예외에 대한 처리를 담당하는 인터페이스와 함께 여러가지 예외 처리 전략에 대하여 알아봅니다. Exception Handling Strategy이번 글의 목표는 스프링 프">
+<meta property="og:type" content="article">
+<meta property="og:title" content="스프링 프레임워크는 어떻게 예외를 처리할까?">
+<meta property="og:url" content="https://mambo-dev.github.io/how-does-springframework-resolve-exceptions/index.html">
+<meta property="og:site_name" content="Mambo Docs">
+<meta property="og:description" content="Overview스프링 프레임워크 기반의 웹 애플리케이션에서 웹 요청을 처리하는 과정에서 발생하는 예외(Exception)에 대하여 어떻게 처리하는 걸까요? 이번 글에서는 스프링 프레임워크가 예외에 대한 처리를 담당하는 인터페이스와 함께 여러가지 예외 처리 전략에 대하여 알아봅니다. Exception Handling Strategy이번 글의 목표는 스프링 프">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-09-25T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-16T12:54:23.977Z">
+<meta property="article:author" content="Mambo">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://mambo-dev.github.io/how-does-springframework-resolve-exceptions/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'ko'
+  };
+</script>
+<title>스프링 프레임워크는 어떻게 예외를 처리할까? | Mambo Docs</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-93954323-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+  
+  <script data-ad-client="ca-pub-9304279418886145" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/docs/atom.xml" title="Mambo Docs" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/docs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Mambo Docs</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Mambo's development guide</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/docs/" rel="section"><i class="fas fa-home fa-fw"></i>홈</a></li>
+        <li class="menu-item menu-item-archives"><a href="/docs/archives/" rel="section"><i class="fas fa-archive fa-fw"></i>아카이브<span class="badge">13</span></a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-가이드"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 가이드</a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-이야기"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%9D%B4%EC%95%BC%EA%B8%B0/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 이야기</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exception-Handling-Strategy"><span class="nav-number">2.</span> <span class="nav-text">Exception Handling Strategy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HandlerExceptionResolver"><span class="nav-number">2.1.</span> <span class="nav-text">HandlerExceptionResolver</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Examples"><span class="nav-number">3.</span> <span class="nav-text">Examples</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Mambo"
+      src="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+  <p class="site-author-name" itemprop="name">Mambo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/docs/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">카테고리</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">태그</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kdevkr" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kdevkr" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kdevkr@gmail.com" title="E-Mail → mailto:kdevkr@gmail.com" rel="noopener" target="_blank"><i class="fas fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" class="cc-opacity" rel="noopener" target="_blank"><img src="/docs/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="ko">
+    <link itemprop="mainEntityOfPage" href="https://mambo-dev.github.io/how-does-springframework-resolve-exceptions/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+      <meta itemprop="name" content="Mambo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mambo Docs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          스프링 프레임워크는 어떻게 예외를 처리할까?
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 2020-09-25 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-25T00:00:00Z">2020-09-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%9D%B4%EC%95%BC%EA%B8%B0/" itemprop="url" rel="index"><span itemprop="name">스프링 프레임워크 이야기</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>스프링 프레임워크 기반의 웹 애플리케이션에서 웹 요청을 처리하는 과정에서 발생하는 예외(Exception)에 대하여 어떻게 처리하는 걸까요? 이번 글에서는 스프링 프레임워크가 예외에 대한 처리를 담당하는 인터페이스와 함께 여러가지 예외 처리 전략에 대하여 알아봅니다.</p>
+<h2 id="Exception-Handling-Strategy"><a href="#Exception-Handling-Strategy" class="headerlink" title="Exception Handling Strategy"></a>Exception Handling Strategy</h2><p>이번 글의 목표는 스프링 프레임워크가 요청에 대한 예외를 처리하는 전략에 대해서 알아보는 것입니다. 스프링 프레임워크의 <code>webmvc</code> 모듈에는 <code>HandlerExceptionResolver</code>라는 인터에피스를 제공합니다. HandlerExceptionResolver는 웹 요청을 처리할 핸들러 함수를 매핑하거나 핸들러 함수가 요청을 처리하는 과정에서 발생하는 예외를 처리할 수 있도록 지원합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">HandlerExceptionResolver</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="function">ModelAndView <span class="title">resolveException</span><span class="params">(HttpServletRequest request, HttpServletResponse response, <span class="meta">@Nullable</span> Object handler, Exception ex)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>다시 말해, HandlerExceptionResolver는 디스패처 서블릿과 컨트롤러 컴포넌트에서 발생하는 예외에 대하여 어떻게 처리해야하는지를 결정하는 전략이라고 할 수 있습니다. 우리는 이 전략에 대하여 공부하기 위하여 HandlerExceptionResolver 구현체들을 살펴보도록 합니다.</p>
+<h3 id="HandlerExceptionResolver"><a href="#HandlerExceptionResolver" class="headerlink" title="HandlerExceptionResolver"></a>HandlerExceptionResolver</h3><p><code>webmvc</code> 모듈에는 스프링 프레임워크에서 제공하는 기본적인 HandlerExceptionResolver 구현체들이 포함되어있습니다. </p>
+<ul>
+<li>HandlerExceptionResolverComposite</li>
+<li>ExceptionHandlerExceptionResolver</li>
+<li>ResponseStatusExceptionResolver</li>
+<li>DefaultHandlerExceptionResolver</li>
+</ul>
+<p>특히, <code>HandlerExceptionResolverComposite</code> 구현체는 <code>@EnableWebMvc</code>를 구성 메타정보 클래스에 선언하면 추가되는 <code>WebMvcConfigurationSupport</code> 클래스에서 HandlerExceptionResolver 유형의 빈으로 등록합니다. 이 구현체는 다른 HandlerExceptionResolver 구현체들에게 예외에 대한 처리를 위임하도록 담당하는 특별한 역할을 하게 됩니다. 따라서, 우리는 HandlerExceptionResolverComposite를 통해 여러가지 HandlerExceptionResolver 구현체를 통해 예외를 처리할 수 있도록 전략을 적용할 수 있게 됩니다.</p>
+<figure class="highlight java"><figcaption><span>HandlerExceptionResolverComposite.java</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ModelAndView <span class="title">resolveException</span><span class="params">(HttpServletRequest request, HttpServletResponse response, <span class="meta">@Nullable</span> Object handler, Exception ex)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.resolvers != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (HandlerExceptionResolver handlerExceptionResolver : <span class="keyword">this</span>.resolvers) &#123;</span><br><span class="line">            ModelAndView mav = handlerExceptionResolver.resolveException(request, response, handler, ex);</span><br><span class="line">                <span class="keyword">if</span> (mav != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> mav;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>우리는 이제 스프링 프레임워크에서 제공하면서 예외에 대한 처리를 담당하는 HandlerExceptionResolver 구현체에 대해서 알아볼 것입니다. HandlerExceptionResolverComposite는 예외 처리를 담당할 HandlerExceptionResolver를 다음과 같은 순서로 처리하게 됩니다.</p>
+<ul>
+<li>ExceptionHandlerExceptionResolver</li>
+<li>ResponseStatusExceptionResolver</li>
+<li>DefaultHandlerExceptionResolver</li>
+</ul>
+<p>HandlerExceptionResolverComposite의 <code>addDefaultHandlerExceptionResolvers()</code> 함수를 살펴보면 위 순서로 등록하는 것을 알 수 있습니다.</p>
+<figure class="highlight java"><figcaption><span>HandlerExceptionResolverComposite.java</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">addDefaultHandlerExceptionResolvers</span><span class="params">(List&lt;HandlerExceptionResolver&gt; exceptionResolvers, ContentNegotiationManager mvcContentNegotiationManager)</span> </span>&#123;</span><br><span class="line">    ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();</span><br><span class="line">    exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager);</span><br><span class="line">    exceptionHandlerResolver.setMessageConverters(getMessageConverters());</span><br><span class="line">    exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());</span><br><span class="line">    exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());</span><br><span class="line">    <span class="keyword">if</span> (jackson2Present) &#123;</span><br><span class="line">        exceptionHandlerResolver.setResponseBodyAdvice(Collections.singletonList(<span class="keyword">new</span> JsonViewResponseBodyAdvice()));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.applicationContext != <span class="keyword">null</span>) &#123;</span><br><span class="line">        exceptionHandlerResolver.setApplicationContext(<span class="keyword">this</span>.applicationContext);</span><br><span class="line">    &#125;</span><br><span class="line">    exceptionHandlerResolver.afterPropertiesSet();</span><br><span class="line">    exceptionResolvers.add(exceptionHandlerResolver);</span><br><span class="line"></span><br><span class="line">    ResponseStatusExceptionResolver responseStatusResolver = <span class="keyword">new</span> ResponseStatusExceptionResolver();</span><br><span class="line">    responseStatusResolver.setMessageSource(<span class="keyword">this</span>.applicationContext);</span><br><span class="line">    exceptionResolvers.add(responseStatusResolver);</span><br><span class="line"></span><br><span class="line">    exceptionResolvers.add(<span class="keyword">new</span> DefaultHandlerExceptionResolver());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="ExceptionHandlerExceptionResolver"><a href="#ExceptionHandlerExceptionResolver" class="headerlink" title="ExceptionHandlerExceptionResolver"></a>ExceptionHandlerExceptionResolver</h4><p>HandlerExceptionResolverComposite에 의해 가장 먼저 예외를 처리하는 <code>ExceptionHandlerExceptionResolver</code>는 <code>@ExceptionHandler</code>가 선언된 핸들러 함수에서 발생한 예외를 담당합니다.</p>
+<figure class="highlight java"><figcaption><span>ExceptionHandlerExceptionResolver.java</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExceptionHandlerExceptionResolver</span> <span class="keyword">extends</span> <span class="title">AbstractHandlerMethodExceptionResolver</span> <span class="keyword">implements</span> <span class="title">ApplicationContextAware</span>, <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> ModelAndView <span class="title">doResolveHandlerMethodException</span><span class="params">(HttpServletRequest request, HttpServletResponse response, <span class="meta">@Nullable</span> HandlerMethod handlerMethod, Exception exception)</span> </span>&#123;</span><br><span class="line">        ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);</span><br><span class="line">        <span class="keyword">if</span> (exceptionHandlerMethod == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 코드처럼 <code>@ExceptionHandler</code>가 선언된 핸들러 함수라면 예외에 대한 처리를 담당하며 아니라면 null을 반환하여 다른 HandlerExceptionResolver 구현체가 예외에 대한 처리를 담당하도록 합니다. ExceptionHandlerExceptionResolver는 ServletInvocableHandlerMethod를 활용하여 핸들러 함수를 호출합니다. 이 과정에서 HandlerMethodArgumentResolver와 HandlerMethodReturnValueHandler를 통해 핸들러 함수의 매개변수에 값을 주입하거나 응답 객체에 따른 응답을 지원합니다. 다시 말하면, @ExceptionHandler가 선언된 핸들러 함수는 컨트롤러 컴포넌트에 선언된 핸들러 함수와 같이 동작하는 것이라고 할 수 있습니다.</p>
+<p>따라서, <code>@ExceptionHandler</code>는 <code>@Controller</code> 또는 <code>@ControllerAdvice</code>가 선언된 컴포넌트의 함수에 선언할 수 있습니다.</p>
+<h4 id="ResponseStatusExceptionResolver"><a href="#ResponseStatusExceptionResolver" class="headerlink" title="ResponseStatusExceptionResolver"></a>ResponseStatusExceptionResolver</h4><p>ExceptionHandlerExceptionResolver에 의해 처리되지 않은 예외라면 @ExceptionHandler가 선언된 핸들러 함수에서 해당 예외 클래스를 담당하지 않았다는 것입니다. 이 예외들은 <code>ResponseStatusExceptionResolver</code>가 처리를 담당하게 되며 예외 클래스에 <code>@ResponseStatus</code>가 선언되었는지를 판단하여 처리할 지 결정하게 됩니다. </p>
+<figure class="highlight java"><figcaption><span>ResponseStatusExceptionResolver.java</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> ModelAndView <span class="title">doResolveException</span><span class="params">(HttpServletRequest request, HttpServletResponse response, <span class="meta">@Nullable</span> Object handler, Exception ex)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (ex <span class="keyword">instanceof</span> ResponseStatusException) &#123;</span><br><span class="line">            <span class="keyword">return</span> resolveResponseStatusException((ResponseStatusException) ex, request, response, handler);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);</span><br><span class="line">        <span class="keyword">if</span> (status != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> resolveResponseStatus(status, request, response, handler, ex);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (ex.getCause() <span class="keyword">instanceof</span> Exception) &#123;</span><br><span class="line">            <span class="keyword">return</span> doResolveException(request, response, handler, (Exception) ex.getCause());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (Exception resolveEx) &#123;</span><br><span class="line">        <span class="keyword">if</span> (logger.isWarnEnabled()) &#123;</span><br><span class="line">            logger.warn(<span class="string">&quot;Failure while trying to resolve exception [&quot;</span> + ex.getClass().getName() + <span class="string">&quot;]&quot;</span>, resolveEx);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>스프링 5+ 부터는 <code>ResponseStatusException</code> 예외 클래스가 추가되었으며 ResponseStatusExceptionResolver가 ResponseStatusException 클래스도 담당하여 처리하게 됩니다. 그리고 다른 예외 클래스에 @ResponseStatus가 선언되었다면 설정된 값에 의해 예외를 처리하게 됩니다. 따라서, 우리는 예외 클래스에 @ResponseStatus를 선언하여 쉽게 예외에 대한 응답을 처리할 수 있습니다.</p>
+<h4 id="DefaultHandlerExceptionResolver"><a href="#DefaultHandlerExceptionResolver" class="headerlink" title="DefaultHandlerExceptionResolver"></a>DefaultHandlerExceptionResolver</h4><p>가장 마지막으로 처리를 담당하는 <code>DefaultHandlerExceptionResolver</code>는 스프링 프레임워크에서 제공하는 기본 MVC 예외 클래스에 대한 예외 처리를 담당합니다. 다음은 DefaultHandlerExceptionResolver가 처리하는 예외 유형과 HTTP 상태 코드에 대한 표입니다.</p>
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>HTTP Status Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HttpRequestMethodNotSupportedException</td>
+<td>405 (SC_METHOD_NOT_ALLOWED)</td>
+<td>HTTP 메소드를 지원하지 않는 경우</td>
+</tr>
+<tr>
+<td>HttpMediaTypeNotSupportedException</td>
+<td>415 (SC_UNSUPPORTED_MEDIA_TYPE)</td>
+<td>POST, PUT, PATCH 요청에 대하여 지원하지 않는 미디어 타입인 경우</td>
+</tr>
+<tr>
+<td>HttpMediaTypeNotAcceptableException</td>
+<td>406 (SC_NOT_ACCEPTABLE)</td>
+<td></td>
+</tr>
+<tr>
+<td>MissingPathVariableException</td>
+<td>500 (SC_INTERNAL_SERVER_ERROR)</td>
+<td>URI 템플릿에 PathVariable을 찾을 수 없는 경우</td>
+</tr>
+<tr>
+<td>MissingServletRequestParameterException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td>요청 파라미터를 찾을 수 없는 경우</td>
+</tr>
+<tr>
+<td>ServletRequestBindingException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td>바인딩 과정에서 오류가 발생한 경우</td>
+</tr>
+<tr>
+<td>ConversionNotSupportedException</td>
+<td>500 (SC_INTERNAL_SERVER_ERROR)</td>
+<td></td>
+</tr>
+<tr>
+<td>TypeMismatchException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td></td>
+</tr>
+<tr>
+<td>HttpMessageNotReadableException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td></td>
+</tr>
+<tr>
+<td>HttpMessageNotWritableException</td>
+<td>500 (SC_INTERNAL_SERVER_ERROR)</td>
+<td>HttpMessageConverter에 의해 변환될 수 없는 경우</td>
+</tr>
+<tr>
+<td>MethodArgumentNotValidException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td></td>
+</tr>
+<tr>
+<td>MissingServletRequestPartException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td></td>
+</tr>
+<tr>
+<td>BindException</td>
+<td>400 (SC_BAD_REQUEST)</td>
+<td></td>
+</tr>
+<tr>
+<td>NoHandlerFoundException</td>
+<td>404 (SC_NOT_FOUND)</td>
+<td>throwExceptionIfNoHandlerFound이면서 웹 요청에 대한 핸들러 함수가 없는 경우</td>
+</tr>
+<tr>
+<td>AsyncRequestTimeoutException</td>
+<td>503 (SC_SERVICE_UNAVAILABLE)</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>만약, 스프링 프레임워크에서 제공하는 기본 예외 클래스들에 대한 응답 전략 구성하고 싶다면 @ExceptionHandler를 선언한 핸들러 함수에서 처리할 수 있습니다. 그리고 DefaultHandlerExceptionResolver는 기본 예외 클래스에 대한 응답 전략을 제공하므로 HandlerExceptionResolver 유형의 빈으로 등록하는 것이 좋습니다.</p>
+<h2 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h2><p>이 섹션은 앞서 알아본 예외 처리 전략에 대해서 공부할 수 있는 예시를 제공합니다.</p>
+<blockquote>
+<p>업데이트 대기중</p>
+</blockquote>
+<hr>
+<p>이번 글을 통해 우리는 스프링 프레임워크 기반의 웹 애플리케이션에서 요청에 대한 예외를 어떻게 처리하는지를 알게되었습니다. 이제 여러분의 프로젝트에서는 어떤 예외 처리 전략을 구성하였는지 확인해보시고 올바르게 전략을 세우고 있는지 검토해보시기 바랍니다.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/docs/spring-web-application-bom/" rel="prev" title="스프링 웹 애플리케이션 - BOM(Bill of Materials)">
+                  <i class="fa fa-chevron-left"></i> 스프링 웹 애플리케이션 - BOM(Bill of Materials)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="kdevkr/kdevkr.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+      <aside class="adsense-block">
+        <div class="adsense-block-wrapper">
+          <!-- AdSense Display -->
+          <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9304279418886145"
+              data-ad-slot="3137426518"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+          <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mambo</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/docs/js/utils.js"></script><script src="/docs/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>

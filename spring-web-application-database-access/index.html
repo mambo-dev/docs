@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/docs/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/docs/images/favicon/favicon-16x16.png">
+  <link rel="mask-icon" href="/docs/images/favicon/favicon.ico" color="#222">
+  <meta name="google-site-verification" content="LMcddVW6xLBS7X1htGQ3duOIEmVp4ljku8sd3UuIcBg">
+
+<link rel="stylesheet" href="/docs/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic%7CNoto+Sans+KR:300,300italic,400,400italic,700,700italic%7CBinggrae-Bold:300,300italic,400,400italic,700,700italic%7CJetbrains+Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mambo-dev.github.io","root":"/docs/","images":"/docs/images","scheme":"Gemini","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"width":240,"scrollpercent":true,"b2t":true},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+<meta name="description" content="Overview본 글은 스프링 프레임워크 Version 5.2.8.RELEASE 문서를 기반으로 작성하였습니다. 일반적으로 웹 애플리케이션에서 발생하는 데이터를 저장하기 위하여 관계형 데이터베이스를 사용합니다. 스프링 프레임워크는 관계형 데이터베이스에 연결할 수 있도록 DataSource에 대한 추상화를 제공합니다. 따라서, JDBC 또는 JPA와 같은 데">
+<meta property="og:type" content="article">
+<meta property="og:title" content="스프링 웹 애플리케이션 - 데이터베이스 액세스">
+<meta property="og:url" content="https://mambo-dev.github.io/spring-web-application-database-access/index.html">
+<meta property="og:site_name" content="Mambo Docs">
+<meta property="og:description" content="Overview본 글은 스프링 프레임워크 Version 5.2.8.RELEASE 문서를 기반으로 작성하였습니다. 일반적으로 웹 애플리케이션에서 발생하는 데이터를 저장하기 위하여 관계형 데이터베이스를 사용합니다. 스프링 프레임워크는 관계형 데이터베이스에 연결할 수 있도록 DataSource에 대한 추상화를 제공합니다. 따라서, JDBC 또는 JPA와 같은 데">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-09-14T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-16T12:54:23.977Z">
+<meta property="article:author" content="Mambo">
+<meta property="article:tag" content="스프링 프레임워크">
+<meta property="article:tag" content="스프링 튜토리얼">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://mambo-dev.github.io/spring-web-application-database-access/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'ko'
+  };
+</script>
+<title>스프링 웹 애플리케이션 - 데이터베이스 액세스 | Mambo Docs</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-93954323-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+  
+  <script data-ad-client="ca-pub-9304279418886145" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/docs/atom.xml" title="Mambo Docs" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/docs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Mambo Docs</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Mambo's development guide</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/docs/" rel="section"><i class="fas fa-home fa-fw"></i>홈</a></li>
+        <li class="menu-item menu-item-archives"><a href="/docs/archives/" rel="section"><i class="fas fa-archive fa-fw"></i>아카이브<span class="badge">13</span></a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-가이드"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 가이드</a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-이야기"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%9D%B4%EC%95%BC%EA%B8%B0/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 이야기</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Access"><span class="nav-number">2.</span> <span class="nav-text">Data Access</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DataSource"><span class="nav-number">2.1.</span> <span class="nav-text">DataSource</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JdbcTemplate"><span class="nav-number">2.2.</span> <span class="nav-text">JdbcTemplate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transaction-Management"><span class="nav-number">3.</span> <span class="nav-text">Transaction Management</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TransactionManager"><span class="nav-number">3.1.</span> <span class="nav-text">TransactionManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Declarative-transaction-management"><span class="nav-number">3.2.</span> <span class="nav-text">Declarative transaction management</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction-bound-Events"><span class="nav-number">3.3.</span> <span class="nav-text">Transaction-bound Events</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Mambo"
+      src="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+  <p class="site-author-name" itemprop="name">Mambo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/docs/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">카테고리</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">태그</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kdevkr" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kdevkr" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kdevkr@gmail.com" title="E-Mail → mailto:kdevkr@gmail.com" rel="noopener" target="_blank"><i class="fas fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" class="cc-opacity" rel="noopener" target="_blank"><img src="/docs/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="ko">
+    <link itemprop="mainEntityOfPage" href="https://mambo-dev.github.io/spring-web-application-database-access/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+      <meta itemprop="name" content="Mambo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mambo Docs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          스프링 웹 애플리케이션 - 데이터베이스 액세스
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 2020-09-14 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-14T00:00:00Z">2020-09-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" itemprop="url" rel="index"><span itemprop="name">스프링 프레임워크 가이드</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>본 글은 스프링 프레임워크 Version <code>5.2.8.RELEASE</code> 문서를 기반으로 작성하였습니다.</p>
+<p>일반적으로 웹 애플리케이션에서 발생하는 데이터를 저장하기 위하여 관계형 데이터베이스를 사용합니다. 스프링 프레임워크는 관계형 데이터베이스에 연결할 수 있도록 DataSource에 대한 추상화를 제공합니다. 따라서, JDBC 또는 JPA와 같은 데이터 액세스 기술을 적용할 수 있도록 지원하고 있습니다.</p>
+<h2 id="Data-Access"><a href="#Data-Access" class="headerlink" title="Data Access"></a>Data Access</h2><p>스프링 프레임워크는 JDBC, JPA와 같은 <code>데이터 액세스</code> 기술과 함께 <code>Data Access Object</code>를 지원합니다. 스프링 프레임워크에서 제공하는 <code>@Repository</code>는 DAO를 지칭할 수 있는 가장 좋은 방법입니다. 스프링 프레임워크는 <code>@Repository</code>가 선언된 빈 클래스에서 발생되는 <code>SQLException</code>을 일관된 <code>DataAccessException</code>으로 변환하는 작업을 수행합니다.</p>
+<h3 id="DataSource"><a href="#DataSource" class="headerlink" title="DataSource"></a>DataSource</h3><p>스프링은 <code>DataSource</code> 인터페이스를 통해 데이터베이스에 대한 <code>커넥션</code>을 가져옵니다. 애플리케이션 개발자는 데이터베이스에 어떤 방식으로 연결하는지 자세히 알 필요는 없으며 Tomcat JDBC, Apache Commons DBCP 그리고 <code>HikariCP</code>와 같은 JDBC 커넥션 풀에서 제공하는 DataSource 구현체를 사용하면 됩니다.</p>
+<h4 id="HikariCP"><a href="#HikariCP" class="headerlink" title="HikariCP"></a>HikariCP</h4><p><a target="_blank" rel="noopener" href="https://github.com/brettwooldridge/HikariCP"><code>HikariCP</code></a>는 가벼움을 자랑하는 JDBC 커넥션 풀 라이브러리입니다. </p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;com.zaxxer:HikariCP:3.4.5&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.postgresql:postgresql:42.2.16&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.springframework:spring-jdbc:5.2.8.RELEASE&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>애플리케이션에서 연결할 데이터베이스 정보를 application.properties에 기술합니다.</p>
+<figure class="highlight properties"><figcaption><span>application.properties</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">spring.datasource.driver-class-name</span>=<span class="string">org.postgresql.Driver</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc:postgresql://localhost:5432/postgres</span></span><br><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">postgres</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">postgres</span></span><br><span class="line"><span class="meta">spring.datasource.auto-commit</span>=<span class="string">false</span></span><br></pre></td></tr></table></figure>
+
+<p>HikariCP에서 제공하는 <code>HikariDataSource</code>를 DataSource 빈으로 등록합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@PropertySource(&#123;&quot;classpath:/application.properties&quot;&#125;)</span></span><br><span class="line"><span class="meta">@ComponentScan(&#123;</span></span><br><span class="line"><span class="meta">    &quot;com.example.demo.repository&quot;,</span></span><br><span class="line"><span class="meta">    &quot;com.example.demo.service&quot;</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DatabaseConfig</span> <span class="keyword">implements</span> <span class="title">EnvironmentAware</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Environment environment;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DataSource <span class="title">dataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        HikariDataSource dataSource = <span class="keyword">new</span> HikariDataSource();</span><br><span class="line">        dataSource.setDriverClassName(environment.getProperty(<span class="string">&quot;spring.datasource.driver-class-name&quot;</span>, String.class));</span><br><span class="line">        dataSource.setJdbcUrl(environment.getProperty(<span class="string">&quot;spring.datasource.url&quot;</span>, String.class));</span><br><span class="line">        dataSource.setUsername(environment.getProperty(<span class="string">&quot;spring.datasource.username&quot;</span>, String.class));</span><br><span class="line">        dataSource.setPassword(environment.getProperty(<span class="string">&quot;spring.datasource.password&quot;</span>, String.class));</span><br><span class="line">        dataSource.setAutoCommit(environment.getProperty(<span class="string">&quot;spring.datasource.auto-commit&quot;</span>, Boolean.class, <span class="keyword">false</span>));</span><br><span class="line">        <span class="keyword">return</span> dataSource;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnvironment</span><span class="params">(Environment environment)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.environment = environment;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="JdbcTemplate"><a href="#JdbcTemplate" class="headerlink" title="JdbcTemplate"></a>JdbcTemplate</h3><p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/data-access.html#jdbc-JdbcTemplate"><code>JdbcTemplate</code></a>는 SQL을 수행할 수 있는 주요 클래스입니다.</p>
+<p>중요한 점은 다음과 같이 다수의 DAO에 대해 공유하기 위하여 안전하게 주입하려면 DataSource에 대한 Setter 주입 시 JdbcTemplate 인스턴스를 생성하는 것이 좋습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Repository</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractRepository</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> Logger LOG = LoggerFactory.getLogger(getClass());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> DataSource dataSource;</span><br><span class="line">    <span class="keyword">protected</span> JdbcTemplate jdbcTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(DataSource dataSource)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.dataSource = dataSource;</span><br><span class="line">        <span class="keyword">this</span>.jdbcTemplate = <span class="keyword">new</span> JdbcTemplate(dataSource);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이외에도 <code>SimpleJdbcInsert</code> 또는 <code>SimpleJdbcCall</code>를 사용하여 데이터베이스에 접근할 수 있습니다.</p>
+<h4 id="SQLExceptionTranslator"><a href="#SQLExceptionTranslator" class="headerlink" title="SQLExceptionTranslator"></a>SQLExceptionTranslator</h4><p>SQLExceptionTranslator 인터페이스는 <code>SQLExceptions</code>와 <code>org.springframework.dao.DataAccessException</code> 사이의 변환을 지원합니다. 기본적으로 <code>SQLErrorCodeSQLExceptionTranslator</code> 구현체가 사용됩니다. </p>
+<p>JdbcTemplate.setExceptionTranslator() 함수로 SQLExceptionTranslator를 변경할 수 있습니다.</p>
+<h2 id="Transaction-Management"><a href="#Transaction-Management" class="headerlink" title="Transaction Management"></a>Transaction Management</h2><p>스프링 프레임워크의 <code>spring-tx</code> 모듈은 TransactionManager 인터페이스를 통해 트랜잭션 관리를 위한 추상화를 제공합니다.</p>
+<h3 id="TransactionManager"><a href="#TransactionManager" class="headerlink" title="TransactionManager"></a>TransactionManager</h3><p>스프링 프레임워크의 TransactionManager 인터페이스는 트랜잭션 전략을 정의합니다. PlatformTransactionManager는 명령형 트랜잭션 관리를 제공합니다. 예를 들어, 다음과 같이 JDBC DataSource에 대한 트랜잭션 지원을 위해 <code>DataSourceTransactionManager</code>를 사용할 수 있습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> PlatformTransactionManager <span class="title">transactionManager</span><span class="params">(DataSource dataSource)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> DataSourceTransactionManager(dataSource);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Declarative-transaction-management"><a href="#Declarative-transaction-management" class="headerlink" title="Declarative transaction management"></a>Declarative transaction management</h3><p>스프링 프레임워크는 선언적 트랜잭션 관리라는 기능을 제공합니다. 대부분의 스프링 애플리케이션 개발자는 주로 선언적 트랜잭션 관리를 사용합니다. 구성 메타정보 클래스에 <code>@EnableTransactionManagement</code>가 선언되면 <code>@Transactional</code>를 사용하여 트랜잭션을 관리할 수 있도록 활성화됩니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableTransactionManagement</span></span><br><span class="line"><span class="meta">@PropertySource(&#123;&quot;classpath:/application.properties&quot;&#125;)</span></span><br><span class="line"><span class="meta">@ComponentScan(&#123;</span></span><br><span class="line"><span class="meta">    &quot;com.example.demo.repository&quot;,</span></span><br><span class="line"><span class="meta">    &quot;com.example.demo.service&quot;</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DatabaseConfig</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="Transaction-bound-Events"><a href="#Transaction-bound-Events" class="headerlink" title="Transaction-bound Events"></a>Transaction-bound Events</h3><p>스프링 애플리케이션 컨텍스트에서 발행되는 이벤트는 <code>@EventListener</code>를 선언한 핸들러 함수를 통해 이벤트를 처리할 수 있었습니다. 발행된 이벤트를 처리하는 핸들러 함수에 대한 트랜잭션 관리가 필요하다면 <code>@TransactionalEventListener</code>를 대신 사용할 수 있습니다.</p>
+<p>다음과 같이 트랜잭션이 진행중인 이벤트인 경우 <code>@TransactionalEventListener</code>를 선언하여 처리할 수 있습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserEventHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@TransactionalEventListener</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleUserCreatedEvent</span><span class="params">(CreationEvent&lt;User&gt; creationEvent)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>만약, CreationEvent에 대한 이벤트 발행 시 트랜잭션안에서 처리되었다면 트랜잭션이 완료된 후에 <code>UserEventHandler</code>의 <code>handleUserCreatedEvent()</code> 핸들러 함수에 의해 이벤트가 처리됩니다.</p>
+<hr>
+<p>우리는 스프링 프레임워크 기반의 웹 애를리케이션에서 데이터베이스에 접근하기 위한 설정을 완료하였고 비즈니스 로직에서 선언적으로 트랜잭션을 관리하는 방법에 대해 알아보았습니다. </p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC/" rel="tag"># 스프링 프레임워크</a>
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%8A%9C%ED%86%A0%EB%A6%AC%EC%96%BC/" rel="tag"># 스프링 튜토리얼</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/docs/spring-web-application-task-execution-and-scheduling/" rel="prev" title="스프링 웹 애플리케이션 - 태스크 수행 및 스케줄링">
+                  <i class="fa fa-chevron-left"></i> 스프링 웹 애플리케이션 - 태스크 수행 및 스케줄링
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/docs/spring-web-application-http-request-client/" rel="next" title="스프링 웹 애플리케이션 - HTTP 요청 클라이언트">
+                  스프링 웹 애플리케이션 - HTTP 요청 클라이언트 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="kdevkr/kdevkr.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+      <aside class="adsense-block">
+        <div class="adsense-block-wrapper">
+          <!-- AdSense Display -->
+          <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9304279418886145"
+              data-ad-slot="3137426518"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+          <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mambo</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/docs/js/utils.js"></script><script src="/docs/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>

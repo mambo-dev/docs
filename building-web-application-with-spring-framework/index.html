@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/docs/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/docs/images/favicon/favicon-16x16.png">
+  <link rel="mask-icon" href="/docs/images/favicon/favicon.ico" color="#222">
+  <meta name="google-site-verification" content="LMcddVW6xLBS7X1htGQ3duOIEmVp4ljku8sd3UuIcBg">
+
+<link rel="stylesheet" href="/docs/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic%7CNoto+Sans+KR:300,300italic,400,400italic,700,700italic%7CBinggrae-Bold:300,300italic,400,400italic,700,700italic%7CJetbrains+Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mambo-dev.github.io","root":"/docs/","images":"/docs/images","scheme":"Gemini","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"width":240,"scrollpercent":true,"b2t":true},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+<meta name="description" content="Overview본 글은 스프링 프레임워크 Version 5.2.8.RELEASE 문서를 기반으로 작성하였습니다. 지난 글에서 우리는 스프링 프레임워크의 기본이 되는 개념인 IoC 컨테이너라는 애플리케이션 컨텍스트에 대해 배웠습니다. 이번 글에서는 스프링 프레임워크 기반의 웹 애플리케이션을 구성하고 실행하는 방법에 대해서 다루겠습니다. Web on Servl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="스프링 웹 애플리케이션 만들기">
+<meta property="og:url" content="https://mambo-dev.github.io/building-web-application-with-spring-framework/index.html">
+<meta property="og:site_name" content="Mambo Docs">
+<meta property="og:description" content="Overview본 글은 스프링 프레임워크 Version 5.2.8.RELEASE 문서를 기반으로 작성하였습니다. 지난 글에서 우리는 스프링 프레임워크의 기본이 되는 개념인 IoC 컨테이너라는 애플리케이션 컨텍스트에 대해 배웠습니다. 이번 글에서는 스프링 프레임워크 기반의 웹 애플리케이션을 구성하고 실행하는 방법에 대해서 다루겠습니다. Web on Servl">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/images/mvc-context-hierarchy.png">
+<meta property="article:published_time" content="2020-09-11T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-16T12:54:23.977Z">
+<meta property="article:author" content="Mambo">
+<meta property="article:tag" content="스프링 프레임워크">
+<meta property="article:tag" content="스프링 튜토리얼">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/images/mvc-context-hierarchy.png">
+
+
+<link rel="canonical" href="https://mambo-dev.github.io/building-web-application-with-spring-framework/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'ko'
+  };
+</script>
+<title>스프링 웹 애플리케이션 만들기 | Mambo Docs</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-93954323-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+  
+  <script data-ad-client="ca-pub-9304279418886145" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/docs/atom.xml" title="Mambo Docs" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/docs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Mambo Docs</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Mambo's development guide</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/docs/" rel="section"><i class="fas fa-home fa-fw"></i>홈</a></li>
+        <li class="menu-item menu-item-archives"><a href="/docs/archives/" rel="section"><i class="fas fa-archive fa-fw"></i>아카이브<span class="badge">13</span></a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-가이드"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 가이드</a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-이야기"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%9D%B4%EC%95%BC%EA%B8%B0/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 이야기</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Web-on-Servlet-Stack"><span class="nav-number">2.</span> <span class="nav-text">Web on Servlet Stack</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#WebApplicationInitializer"><span class="nav-number">2.1.</span> <span class="nav-text">WebApplicationInitializer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Embedded-Tomcat"><span class="nav-number">2.2.</span> <span class="nav-text">Embedded Tomcat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Annotated-Controllers"><span class="nav-number">2.3.</span> <span class="nav-text">Annotated Controllers</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Template-Engine"><span class="nav-number">3.</span> <span class="nav-text">Template Engine</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FreeMarkerViewResolver"><span class="nav-number">3.1.</span> <span class="nav-text">FreeMarkerViewResolver</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Logging-System"><span class="nav-number">4.</span> <span class="nav-text">Logging System</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Logback"><span class="nav-number">4.1.</span> <span class="nav-text">Logback</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Mambo"
+      src="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+  <p class="site-author-name" itemprop="name">Mambo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/docs/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">카테고리</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">태그</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kdevkr" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kdevkr" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kdevkr@gmail.com" title="E-Mail → mailto:kdevkr@gmail.com" rel="noopener" target="_blank"><i class="fas fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" class="cc-opacity" rel="noopener" target="_blank"><img src="/docs/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="ko">
+    <link itemprop="mainEntityOfPage" href="https://mambo-dev.github.io/building-web-application-with-spring-framework/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+      <meta itemprop="name" content="Mambo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mambo Docs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          스프링 웹 애플리케이션 만들기
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 2020-09-11 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-11T00:00:00Z">2020-09-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" itemprop="url" rel="index"><span itemprop="name">스프링 프레임워크 가이드</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>본 글은 스프링 프레임워크 Version <code>5.2.8.RELEASE</code> 문서를 기반으로 작성하였습니다.</p>
+<p>지난 글에서 우리는 스프링 프레임워크의 기본이 되는 개념인 IoC 컨테이너라는 애플리케이션 컨텍스트에 대해 배웠습니다. 이번 글에서는 스프링 프레임워크 기반의 웹 애플리케이션을 구성하고 실행하는 방법에 대해서 다루겠습니다.</p>
+<h2 id="Web-on-Servlet-Stack"><a href="#Web-on-Servlet-Stack" class="headerlink" title="Web on Servlet Stack"></a>Web on Servlet Stack</h2><p>스프링 5 부터 웹 애플리케이션이 동작하는 방식이 기존의 서블릿 API를 사용하는 서블릿 스택과 <a target="_blank" rel="noopener" href="https://www.reactive-streams.org/">Reactive Streams</a> 스펙 기반의 <a target="_blank" rel="noopener" href="https://projectreactor.io/">리액티브</a> 스택이 있습니다. 리액티브 스택은 블로킹 기반의 서블릿 스택과 달리 논-블로킹이라는 특징이 있습니다. 리액티브 스택의 웹 애플리케이션을 개발하기 위해서는 우선적으로 비동기 프로그래밍을 배워야하므로 많은 개발자들에게 익숙한 서블릿 스택 기반의 웹 애플리케이션을 만들어보도록 합니다.</p>
+<p>서블릿 스택 기반의 웹 애플리케이션을 만들기 위해 <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/org.springframework/spring-webmvc/5.2.8.RELEASE"><code>spring-webmvc</code></a>와 <code>javax.servlet-api</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.springframework:spring-webmvc:5.2.8.RELEASE&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;javax.servlet:javax.servlet-api:4.0.1&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>자바 웹 애플리케이션을 Tomcat과 같은 웹 컨테이너를 통해 실행할 경우 웹 컨테이너는 클래스패스에 위치한 <a target="_blank" rel="noopener" href="https://cloud.google.com/appengine/docs/flexible/java/configuring-the-web-xml-deployment-descriptor?hl=ko"><code>web.xml</code></a>이라는 배포 설명자 파일을 참조합니다. 스프링 프레임워크의 <code>spring-web</code> 모듈에는 배포 설명자 파일인 web.xml을 자바 코드로 대체할 수 있는 특별한 인터페이스를 제공합니다.</p>
+<h3 id="WebApplicationInitializer"><a href="#WebApplicationInitializer" class="headerlink" title="WebApplicationInitializer"></a>WebApplicationInitializer</h3><p>웹 컨테이너에서 가장 먼저 참조하는 배포 설명자를 구성하기 위하여 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/WebApplicationInitializer.html"><code>WebApplicationInitializer</code></a> 인터페이스에 대한 구현체를 생성할 수 있습니다.</p>
+<p>웹 컨테이너가 실행될 때 클래스패스에 위치한 web.xml 파일이 존재하지 않을 경우 WebApplicationInitializer를 감지하여 web.xml로 대체하여 사용하게 됩니다. 정말로 WebApplicationInitializer로 web.xml을 대체할 수 있는지 확인해봅시다.</p>
+<p>우선 다음과 같이 WebApplicationInitializer 구현체를 클래스패스에 생성합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebServletInitializer</span> <span class="title">implementation</span> <span class="title">WebApplicationInitializer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStartup</span><span class="params">(ServletContext servletContext)</span> </span>&#123;</span><br><span class="line">        AnnotationConfigWebApplicationContext applicationContext = <span class="keyword">new</span> AnnotationConfigWebApplicationContext();</span><br><span class="line">        applicationContext.setConfigLocation(<span class="string">&quot;com.example.demo.config&quot;</span>);</span><br><span class="line">        servletContext.addListener(<span class="keyword">new</span> ContextLoaderListener(applicationContext));</span><br><span class="line">        ServletRegistration.Dynamic dispatcher = servletContext.addServlet(<span class="string">&quot;dispatcher&quot;</span>, <span class="keyword">new</span> DispatcherServlet(applicationContext));</span><br><span class="line">        dispatcher.setLoadOnStartup(<span class="number">1</span>);</span><br><span class="line">        dispatcher.addMapping(<span class="string">&quot;/&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 자바 코드는 아래의 web.xml을 기술한 것과 같다고 볼 수 있습니다.</p>
+<figure class="highlight xml"><figcaption><span>web.xml</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">version</span>=<span class="string">&quot;2.5&quot;</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://java.sun.com/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">       <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://java.sun.com/xml/ns/javaee  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot;</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">context-param</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>contextConfigLocation<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>/WEB-INF/spring/application-context.xml<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">context-param</span>&gt;</span></span><br><span class="line">       </span><br><span class="line">       <span class="tag">&lt;<span class="name">listener</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">listener-class</span>&gt;</span>org.springframework.web.context.ContextLoaderListener<span class="tag">&lt;/<span class="name">listener-class</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">listener</span>&gt;</span></span><br><span class="line">       </span><br><span class="line">       <span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>dispatcher<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>org.springframework.web.servlet.DispatcherServlet<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">init-param</span>&gt;</span></span><br><span class="line">                     <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>contextConfigLocation<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">                     <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>/WEB-INF/spring/application-context.xml<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;/<span class="name">init-param</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">load-on-startup</span>&gt;</span>1<span class="tag">&lt;/<span class="name">load-on-startup</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line">              </span><br><span class="line">       <span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>dispatcher<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>위 예제는 <code>단일 애플리케이션 컨텍스트</code>로 동작하는 웹 애플리케이션을 구성합니다. 그러나 대부분의 web.xml에 대한 예제를 찾아보면 <code>루트 애플리케이션 컨텍스트</code>와 디스패처 서블릿이 참조하는 <code>서블릿 컨텍스트</code>를 구분하여 구성한 것이 많습니다. 스프링 프레임워크는 단일 애플리케이션 컨텍스트 구조 뿐만 아니라 루트 애플리케이션 컨텍스트와 서블릿 애플리케이션 컨텍스트를 나누어 컨텍스트 계층을 구성할 수 있는 특별한 <code>AbstractAnnotationConfigDispatcherServletInitializer</code> 클래스를 제공합니다.</p>
+<p>AbstractAnnotationConfigDispatcherServletInitializer가 클래스패스에 위치하는 경우 다음과 같은 구조로 웹 애플리케이션을 구성할 수 있습니다.<br><img data-src="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/images/mvc-context-hierarchy.png"></p>
+<p>위 그림은 스프링 프레임워크 공식 레퍼런스에서 제공하는 <code>다중 컨텍스트 계층</code>을 표현합니다. 웹과 관련된 빈 클래스들은 서블릿 웹 애플리케이션 컨텍스트에서 관리되며 루트 애플리케이션 컨텍스트에는 웹과 관련이 없거나 공통적으로 사용되는 빈 클래스들을 관리하도록 합니다.</p>
+<p>다음 예제 코드는 AbstractAnnotationConfigDispatcherServletInitializer를 적용하는 예시입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebServletInitializer</span> <span class="keyword">extends</span> <span class="title">AbstractAnnotationConfigDispatcherServletInitializer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Class&lt;?&gt;[] getRootConfigClasses() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Class&lt;?&gt;[] &#123; AppConfig.class &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Class&lt;?&gt;[] getServletConfigClasses() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Class&lt;?&gt;[] &#123; WebConfig.class &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> String[] getServletMappings() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> String[]&#123;<span class="string">&quot;/&quot;</span>&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>루트 애플리케이션 컨텍스트가 참조하는 구성 메타정보는 <code>getRootConfigClasses</code>에서 반환합니다. 그리고 서블릿 애플리케이션 컨텍스트에서 참조하는 구성 메타정보는 <code>getServletConfigClasses</code>에서 반환합니다. 따라서, 위 예제 코드에서는 루트 애플리케이션 컨텍스트는 AppConfig 클래스에 등록된 빈 클래스들을 관리하게 되고 WebConfig 클래스에 등록된 빈 클래스들은 서블릿 애플리케이션 컨텍스트를 통해 관리됩니다. </p>
+<blockquote>
+<p>이때 만들어지는 디스패처 서블릿은 dispatcher라는 이름을 기본으로 사용합니다.</p>
+</blockquote>
+<p>따라서, 다중 애플리케이션 컨텍스트 계층으로 웹 애플리케이션을 구성한다면 루트 애플리케이션 컨텍스트와 서블릿 애플리케이션 컨텍스트에서 관리해야할 빈들을 잘 구분하여 등록하여 사용하는 것이 좋습니다.</p>
+<p>이제 웹 컨테이너에서 읽어야할 배포 설명자인 WebApplicationInitializer가 준비되었으므로 웹 애플리케이션을 구동할 수 있습니다. 저는 임베디드 톰캣 모듈을 통하여 쉽게 애플리케이션을 구동하는 방법을 설명하도록 하겠습니다.</p>
+<h3 id="Embedded-Tomcat"><a href="#Embedded-Tomcat" class="headerlink" title="Embedded Tomcat"></a>Embedded Tomcat</h3><p>임베디드 톰캣으로 애플리케이션을 실행하기 위하여 <code>tomcat-embed-core</code>와 <code>tomcat-embed-jasper</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.apache.tomcat.embed:tomcat-embed-core:9.0.37&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.apache.tomcat.embed:tomcat-embed-jasper:9.0.37&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>SpringApplication에서 톰캣 서버를 실행하도록 다음과 같이 코드를 작성합니다. </p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(<span class="keyword">final</span> String[] args)</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line">        Tomcat tomcat = <span class="keyword">new</span> Tomcat();</span><br><span class="line">        tomcat.setBaseDir(<span class="string">&quot;out/webapp&quot;</span>);</span><br><span class="line">        Connector connector = tomcat.getConnector();</span><br><span class="line">        connector.setURIEncoding(StandardCharsets.UTF_8.displayName());</span><br><span class="line"></span><br><span class="line">        tomcat.addWebapp(<span class="string">&quot;&quot;</span>, <span class="keyword">new</span> File(<span class="string">&quot;src/main/webapp&quot;</span>).getAbsolutePath());</span><br><span class="line">        tomcat.setPort(<span class="number">8080</span>);</span><br><span class="line">        tomcat.start();</span><br><span class="line">        tomcat.getServer().await();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 SpringApplication을 실행하고 로그를 확인합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="number">9</span>월 <span class="number">11</span>, <span class="number">2020</span> <span class="number">10</span>:<span class="number">39</span>:<span class="number">10</span> 오후 org.apache.catalina.startup.ContextConfig getDefaultWebXmlFragment</span><br><span class="line">정보: No global web.xml found</span><br><span class="line"><span class="number">9</span>월 <span class="number">11</span>, <span class="number">2020</span> <span class="number">10</span>:<span class="number">39</span>:<span class="number">11</span> 오후 org.apache.catalina.core.ApplicationContext log</span><br><span class="line">정보: <span class="number">1</span> Spring WebApplicationInitializers detected on classpath</span><br><span class="line">...</span><br><span class="line"><span class="number">9</span>월 <span class="number">11</span>, <span class="number">2020</span> <span class="number">10</span>:<span class="number">39</span>:<span class="number">12</span> 오후 org.apache.coyote.AbstractProtocol start</span><br><span class="line">정보: Starting ProtocolHandler [<span class="string">&quot;http-nio-8080&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>출력된 로그를 살펴보면 Spring WebApplicationInitializers detected on classpath 에서 확인할 수 있듯이 클래스패스에 있는 WebApplicationInitializer를 web.xml으로 사용하였습니다.</p>
+<p>톰캣이 웹 애플리케이션을 정상적으로 구동하였으므로 브라우저를 통해 <a target="_blank" rel="noopener" href="http://localhost:8080/">http://localhost:8080</a> 로 접속해보겠습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">경고: No mapping <span class="keyword">for</span> GET /</span><br></pre></td></tr></table></figure>
+
+<p>이런… 디스패처 서블릿이 처리를 위임할 서블릿을 찾을 수 없어 경고 메시지가 출력되었고 브라우저에서는 응답 없음을 확인할 수 있습니다. 이제 우리가 알아야할 것은 웹 요청을 처리할 서블릿을 스프링 프레임워크가 제공하는 클래스로 구성하는 것입니다.</p>
+<h3 id="Annotated-Controllers"><a href="#Annotated-Controllers" class="headerlink" title="Annotated Controllers"></a>Annotated Controllers</h3><p>스프링 웹 MVC 모듈은 웹 요청을 처리할 컴포넌트를 만들 수 있는 어노테이션을 제공합니다. 스프링 프레임워크에서 웹 요청을 처리하는 컴포넌트를 컨트롤러라고 합니다. 그리고 컨트롤러라는 것을 <code>@Controller</code>와 <code>@RestController</code>를 선언하여 나타낼 수 있습니다. </p>
+<p>컨트롤러는 웹 관련 빈 클래스이므로 서블릿 웹 애플리케이션 컨텍스트의 구성 메타정보인 <code>WebConfig</code>에 등록하겠습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@ComponentScan(&#123;&quot;com.example.demo.controller&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebConfig</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@ComponentScan</code>을 선언하였으므로 <code>com.example.demo.controller</code> 패키지에 있는 컨트롤러 컴포넌트들은 서블릿 애플리케이션 컨텍스트에서 관리됩니다. </p>
+<p>다음과 같이 <code>HomeController</code>라는 컨트롤러를 만들어 웹 요청을 처리할 <code>핸들러 함수</code>를 만들겠습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HomeController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">home</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        PrintWriter writer = response.getWriter();</span><br><span class="line">        writer.println(<span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">        writer.flush();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 SpringApplication을 실행하면 디스패처 서블릿이 웹 요청에 대해 처리할 컨트롤러를 찾아 위임하여 HTTP 요청을 처리하고 응답을 받게됩니다. </p>
+<p><code>Hello World</code>라는 문자열이 브라우저에 표시되었나요?</p>
+<p>대부분의 스프링 애플리케이션 예제와 달리 컨트롤러의 핸들러 함수에서 “Hello World”를 반환하지 않는지 궁금해 해야합니다. 저는 어떤 지식을 공부할 때에는 궁금한게 많아야한다고 생각하는 편입니다. 왜 HttpServletResponse에서 <code>PrintWriter</code>를 가져와 문자열을 출력했는지는 공식 레퍼런스를 살펴보면 찾을 수 있습니다.</p>
+<p>우선 컨트롤러 컴포넌트를 만들때 사용하는 것들에 대해 알아보면서 설명하겠습니다.</p>
+<h4 id="Request-Mapping"><a href="#Request-Mapping" class="headerlink" title="Request Mapping"></a>Request Mapping</h4><p>가장 먼저 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-requestmapping"><code>@RequestMapping</code></a>은 선언된 핸들러 함수가 어떻게 웹 요청을 처리할지 결정할 수 있습니다. 예를 들어, 특정 URL, 파라미터, 헤더, 미디어 타입에 따라 처리할 요청을 구분할 수 있습니다. 위 예제에서 선언된 <code>@GetMapping</code>은 이 @RequestMapping에 대해 HTTP 메소드에 따라 확장한 어노테이션 중 하나입니다.</p>
+<ul>
+<li>@GetMapping</li>
+<li>@PostMapping</li>
+<li>@PutMapping</li>
+<li>@DeleteMapping</li>
+</ul>
+<p>만약, 컨트롤러에서 처리하는 함수가 여러가지 HTTP 메소드를 지원하는 경우가 아니라면 HTTP 메소드에 따라 확장된 어노테이션을 선언하는 것이 가독성에 이점이 있습니다.</p>
+<h4 id="Handler-Methods"><a href="#Handler-Methods" class="headerlink" title="Handler Methods"></a>Handler Methods</h4><p>컨트롤러에 선언된 핸들러 함수는 여러가지 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-arguments">매개변수</a>를 지정할 수 있습니다.</p>
+<p>위 예제 코드에서 HttpServletRequest와 HttpServletResponse도 매개변수로 받을 수 있는 클래스 중 하나입니다. </p>
+<h4 id="Return-Values"><a href="#Return-Values" class="headerlink" title="Return Values"></a>Return Values</h4><p>앞서 핸들러 함수에서 void 형식을 반환한 이유를 여기서 확인할 수 있습니다. 컨트롤러의 핸들러 함수는 반환할 수 있는 형식이 정해져 있습니다. 예를 들어, 컨트롤러에 선언된 핸들러 함수가 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-ann-return-types">반환하는 유형</a> 중 <code>String</code>은 문자열을 응답하는 것이 아니라 스프링 프레임워크에서 사용하는 <code>뷰(View)</code>라는 응답 객체의 이름을 지정하는 것으로 정해져있습니다. </p>
+<p>따라서, “Hello World”라는 문자열을 응답으로 출력 위하여 String 형식으로 반환하였다면 디스패처 서블릿은 응답을 위해 Hello Wolrd라는 이름을 가진 뷰를 찾게됩니다. 디스패처 서블릿은 결국 요청을 처리할 수 없다고 판단합니다.</p>
+<p>다음 처럼 말이죠.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">home</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">경고: No mapping <span class="keyword">for</span> GET /Hello World</span><br></pre></td></tr></table></figure>
+
+<p>스프링 웹 MVC는 핸들러 함수에서 반환하는 유형에 따라 응답해야하는 것을 구분하기 위하여 <code>ViewResolver</code> 인터페이스를 통해 수행합니다. 기본적으로 ViewResolver에 대한 설정이 존재하지 않으면 <code>InternalResourceViewResolver</code>를 사용하게 됩니다. 여기서 확인할 수 있는 점은 우리가 원하는 형식으로 응답하기 위해서는 ViewResolver에 대한 설정을 해야한다는 것입니다.</p>
+<p>다음의 ViewResolver에 대해서 찾아보시기를 추천합니다.</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html">ContentNegotiatingViewResolver</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html">InternalResourceViewResolver</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/freemarker/FreeMarkerViewResolver.html">FreeMarkerViewResolver</a></li>
+</ul>
+<h2 id="Template-Engine"><a href="#Template-Engine" class="headerlink" title="Template Engine"></a>Template Engine</h2><p>위에서 언급한 ViewResolver 중 <code>FreeMarkerViewResolver</code>는 프리마커 템플릿 엔진을 사용하여 HTML을 응답하기 위한 설정을 할 때 사용할 수 있습니다. 웹 애플리케이션의 목표는 웹 요청을 처리하여 응답하는 것이며 HTML 형식으로 응답하는 것은 중요한 부분입니다.</p>
+<p>스프링 웹 MVC에서 기본적으로 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/InternalResourceViewResolver.html"><code>InternalResourceViewResolver</code></a>을 사용하여 뷰를 응답한다고 하였습니다. 이 InternalResourceViewResolver는 UrlBasedViewResolver를 확장한 클래스로 Servlet이나 JSP와 같은 <code>InternalResourceView</code> 또는 <code>JstlView</code>를 응답으로 사용하게 됩니다.</p>
+<p>예를 들어, 다음과 같이 컨트롤러 핸들러 함수에서 <code>index</code>라는 뷰 이름을 반환합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HomeController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>그러면 InternalResourceViewResolver에 의해 InternalResourceView로 판단하고 <code>/index</code>라는 경로로 요청이 <code>포워딩</code> 됩니다.</p>
+<blockquote>
+<p>여기서 포워딩 되는 이유는 InternalResourceViewResolver가 UrlBasedViewResolver를 기반으로 하기 때문입니다.</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.DispatcherServlet(91) - GET <span class="string">&quot;/&quot;</span>, parameters=&#123;&#125;</span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping(414) - Mapped to com.example.demo.controller.HomeController<span class="comment">#index(HttpServletRequest, HttpServletResponse)</span></span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.v.InternalResourceView(309) - View name <span class="string">&#x27;index&#x27;</span>, model &#123;&#125;</span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.v.InternalResourceView(169) - Forwarding to [index]</span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.DispatcherServlet(91) - <span class="string">&quot;FORWARD&quot;</span> dispatch <span class="keyword">for</span> GET <span class="string">&quot;/index&quot;</span>, parameters=&#123;&#125;</span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] WARN  o.s.w.s.PageNotFound(1251) - No mapping <span class="keyword">for</span> GET /index</span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.DispatcherServlet(1127) - Exiting from <span class="string">&quot;FORWARD&quot;</span> dispatch, status 404</span><br><span class="line">2020-09-13 08:19:33 [http-nio-8080-exec-1] DEBUG o.s.w.s.DispatcherServlet(1131) - Completed 404 NOT_FOUND</span><br></pre></td></tr></table></figure>
+
+<p>결과적으로 우리는 클래스패스에 HTML 파일을 생성하였다고 해서 응답할 수 없습니다.</p>
+<h3 id="FreeMarkerViewResolver"><a href="#FreeMarkerViewResolver" class="headerlink" title="FreeMarkerViewResolver"></a>FreeMarkerViewResolver</h3><p>스프링 프레임워크 애플리케이션을 개발하는 대부분의 개발자들은 JSP를 사용해왔습니다. 그러나 최근에는 JSP 보다는 Thymeleaf 또는 FreeMarker 같은 템플릿 엔진을 선호합니다. 그래서 스프링 부트 프로젝트에서는 기본적으로 JSP에 대한 의존성을 지원하지 않고 있습니다. JSP를 원하는 개발자들이 서운해할 수 있지만 프리마커 템플릿 엔진을 사용하여 HTML을 응답해보도록 하겠습니다.</p>
+<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/javadoc-api/org/springframework/web/servlet/view/freemarker/FreeMarkerViewResolver.html"><code>FreeMarkerViewResolver</code></a>는 <code>FreeMarkerView</code> 클래스를 뷰로 응답할 수 있도록 지원합니다. 즉, 프리마커 템플릿 엔진을 사용하여 웹 요청을 HTML 형식으로 응답할 수 있게 되는 것입니다.</p>
+<p>먼저, 프리마커 템플릿 엔진을 사용하기 위해 <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/org.freemarker/freemarker/2.3.30"><code>freemarker</code></a>와 <code>spring-context-support</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.freemarker:freemarker:2.3.30&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.springframework:spring-context-support:5.2.8.RELEASE&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>서블릿 컨텍스트 메타정보 클래스에 <code>FreeMarkerViewResolver</code>와 <code>FreeMarkerConfigurer</code>를 빈으로 등록합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@ComponentScan(&#123;&quot;com.example.demo.controller&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> FreeMarkerViewResolver <span class="title">freemarkerViewResolver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        FreeMarkerViewResolver viewResolver = <span class="keyword">new</span> FreeMarkerViewResolver();</span><br><span class="line">        viewResolver.setContentType(<span class="string">&quot;text/html; charset=UTF-8&quot;</span>);</span><br><span class="line">        viewResolver.setCache(<span class="keyword">false</span>);</span><br><span class="line">        viewResolver.setSuffix(<span class="string">&quot;.html&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> viewResolver;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> FreeMarkerConfigurer <span class="title">freemarkerConfig</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        FreeMarkerConfigurer freeMarkerConfigurer = <span class="keyword">new</span> FreeMarkerConfigurer();</span><br><span class="line">        freeMarkerConfigurer.setTemplateLoaderPath(<span class="string">&quot;classpath:/templates/&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> freeMarkerConfigurer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 애플리케이션을 실행하면 FreeMarkerViewResolver와 FreeMarkerConfigurer를 빈으로 등록하는 로그가 출력되었습니다.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2020-09-13 09:36:59 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;freemarkerViewResolver&#39;</span><br><span class="line">2020-09-13 09:36:59 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;freemarkerConfig&#39;</span><br><span class="line">2020-09-13 09:36:59 [main] DEBUG o.s.w.s.v.f.FreeMarkerConfigurer(347) - Template loader path [class path resource [templates&#x2F;]] resolved to file path [C:\Users\Mambo\git\spring5\out\production\resources\templates]</span><br></pre></td></tr></table></figure>
+
+<p>이제 <a href="http://localhost:8080에">http://localhost:8080에</a> 대해 웹 요청이 들어오면 <code>/templates/index.html</code>을 <code>FreeMarkerView</code>로 응답하게 됩니다.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2020-09-13 09:38:10 [http-nio-8080-exec-2] DEBUG o.s.w.s.DispatcherServlet(91) - GET &quot;&#x2F;&quot;, parameters&#x3D;&#123;&#125;</span><br><span class="line">2020-09-13 09:38:10 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping(414) - Mapped to com.example.demo.controller.HomeController#index(HttpServletRequest, HttpServletResponse)</span><br><span class="line">2020-09-13 09:38:10 [http-nio-8080-exec-2] DEBUG o.s.w.s.v.f.FreeMarkerView(309) - View name &#39;index&#39;, model &#123;&#125;</span><br><span class="line">2020-09-13 09:38:10 [http-nio-8080-exec-2] DEBUG o.s.w.s.v.f.FreeMarkerView(176) - Rendering [index.html]</span><br><span class="line">2020-09-13 09:38:10 [http-nio-8080-exec-2] DEBUG o.s.w.s.DispatcherServlet(1131) - Completed 200 OK</span><br></pre></td></tr></table></figure>
+
+<h4 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h4><p>FreeMarker도 템플릿 엔진이므로 Model에 값을 넣어 표시할 수 있습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Model model)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    model.addAttribute(<span class="string">&quot;message&quot;</span>, <span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 다음과 같이 Model에 message 속성을 index.html 템플릿에서 사용할 수 있습니다.</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;ko&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h3</span>&gt;</span>$&#123;message&#125;<span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Logging-System"><a href="#Logging-System" class="headerlink" title="Logging System"></a>Logging System</h2><p>스프링 프레임워크는 <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/org.springframework/spring-jcl"><code>spring-jcl</code></a> 모듈을 통해 <code>SLF4J</code>와 같은 다양한 로깅에 대한 추상화를 지원합니다. 따라서, 스프링 프레임워크 기반의 웹 애플리케이션에서 로그 출력을 위한 기능은 쉽게 적용할 수 있습니다.</p>
+<p><code>slf4j-api</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.slf4j:slf4j-api:1.7.30&#x27;</span></span><br><span class="line"><span class="comment">// implementation &#x27;org.slf4j:slf4j-simple:1.7.30&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>SLF4J는 로거 추상화로 구현체를 아직 추가하지 않았기 때문에 다음과 같은 로그가 출력됩니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">9</span>월 <span class="number">12</span>, <span class="number">2020</span> <span class="number">4</span>:<span class="number">21</span>:<span class="number">31</span> 오후 org.apache.jasper.servlet.TldScanner scanJars</span><br><span class="line">정보: At least one JAR was scanned <span class="keyword">for</span> TLDs yet contained no TLDs. Enable debug logging <span class="keyword">for</span> <span class="keyword">this</span> logger <span class="keyword">for</span> a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.</span><br><span class="line">SLF4J: Failed to load class &quot;org.slf4j.impl.StaticLoggerBinder&quot;.</span><br><span class="line">SLF4J: Defaulting to no-operation (NOP) logger implementation</span><br><span class="line">SLF4J: See http:<span class="comment">//www.slf4j.org/codes.html#StaticLoggerBinder for further details.</span></span><br></pre></td></tr></table></figure>
+
+<p>가장 기본적인 <code>slf4j-simple</code> 의존성을 추가하면 정상적으로 스프링 프레임워크에 대한 로그가 출력됩니다.</p>
+<h3 id="Logback"><a href="#Logback" class="headerlink" title="Logback"></a>Logback</h3><p>slf4j-simple로 출력되는 로그 보다는 <a target="_blank" rel="noopener" href="http://logback.qos.ch/"><code>Logback</code></a>과 같은 SLF4J 구현체를 사용하는 것이 좋습니다.</p>
+<p>다음 <code>logback-classic</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;ch.qos.logback:logback-classic:1.2.3&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>클래스패스에 <code>logback.xml</code> 파일을 생성하고 로그백으로 로그를 출력하기 위한 설정을 기술합니다.</p>
+<figure class="highlight"><figcaption><span>logback.xml</span></figcaption><table><tr><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="line">&lt;configuration&gt;</span><br><span class="line">    &lt;appender name=<span class="string">&quot;STDOUT&quot;</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;ch.qos.logback.core.ConsoleAppender&quot;</span>&gt;</span><br><span class="line">        &lt;encoder&gt;</span><br><span class="line">            &lt;pattern&gt;%d&#123;yyyy-MM-dd HH:mm:ss&#125; [%thread] %highlight(%-5level) %cyan(%logger&#123;25&#125;\(%line\)) - %msg%n&lt;/pattern&gt;</span><br><span class="line">        &lt;/encoder&gt;</span><br><span class="line">    &lt;/appender&gt;</span><br><span class="line"></span><br><span class="line">    &lt;root level=<span class="string">&quot;debug&quot;</span>&gt;</span><br><span class="line">        &lt;appender-ref ref=<span class="string">&quot;STDOUT&quot;</span>/&gt;</span><br><span class="line">    &lt;/root&gt;</span><br><span class="line">&lt;/configuration&gt;</span><br></pre></td></tr></table></figure>
+
+<p>이제 애플리케이션을 실행하면 웹 애플리케이션에 대한 로그가 다음과 같이 출력됩니다.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2020-09-12 16:58:11 [main] INFO  o.s.w.s.DispatcherServlet(525) - Initializing Servlet &#39;dispatcher&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.w.c.s.AnnotationConfigWebApplicationContext(596) - Refreshing WebApplicationContext for namespace &#39;dispatcher-servlet&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.w.c.s.AnnotationConfigWebApplicationContext(217) - Registering component classes: [class com.example.demo.config.WebConfig]</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;org.springframework.context.annotation.internalConfigurationAnnotationProcessor&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;org.springframework.context.event.internalEventListenerProcessor&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;org.springframework.context.event.internalEventListenerFactory&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;org.springframework.context.annotation.internalAutowiredAnnotationProcessor&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;org.springframework.context.annotation.internalCommonAnnotationProcessor&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.u.c.s.UiApplicationContextUtils(85) - Unable to locate ThemeSource with name &#39;themeSource&#39;: using default [org.springframework.ui.context.support.DelegatingThemeSource@7741507c]</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;webConfig&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.b.f.s.DefaultListableBeanFactory(217) - Creating shared instance of singleton bean &#39;homeController&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping(351) - 1 mappings in &#39;org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping&#39;</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter(611) - ControllerAdvice beans: none</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver(294) - ControllerAdvice beans: none</span><br><span class="line">2020-09-12 16:58:11 [main] DEBUG o.s.w.s.DispatcherServlet(542) - enableLoggingRequestDetails&#x3D;&#39;false&#39;: request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data</span><br><span class="line">2020-09-12 16:58:11 [main] INFO  o.s.w.s.DispatcherServlet(547) - Completed initialization in 165 ms</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>이번 글을 통해 스프링 프레임워크 기반의 웹 애플리케이션을 만들고 실행하는 법에 대해서 알게 되었습니다. 스프링 MVC 모듈은 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring/docs/5.2.8.RELEASE/spring-framework-reference/web.html#mvc-config"><code>MVC Configuration</code></a>을 위한 클래스를 추가적으로 제공합니다. 다음 글에서는 MVC Configuration을 통해 스프링 프레임워크 기반의 웹 애플리케이션에 대한 기능을 좀 더 확장해보겠습니다.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC/" rel="tag"># 스프링 프레임워크</a>
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%8A%9C%ED%86%A0%EB%A6%AC%EC%96%BC/" rel="tag"># 스프링 튜토리얼</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/docs/getting-started-spring-framework/" rel="prev" title="스프링 프레임워크 시작하기">
+                  <i class="fa fa-chevron-left"></i> 스프링 프레임워크 시작하기
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/docs/configure-spring-web-application/" rel="next" title="스프링 웹 애플리케이션 구성 확장하기">
+                  스프링 웹 애플리케이션 구성 확장하기 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="kdevkr/kdevkr.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+      <aside class="adsense-block">
+        <div class="adsense-block-wrapper">
+          <!-- AdSense Display -->
+          <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9304279418886145"
+              data-ad-slot="3137426518"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+          <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mambo</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/docs/js/utils.js"></script><script src="/docs/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>

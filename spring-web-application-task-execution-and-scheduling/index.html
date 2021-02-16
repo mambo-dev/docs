@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/docs/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/docs/images/favicon/favicon-16x16.png">
+  <link rel="mask-icon" href="/docs/images/favicon/favicon.ico" color="#222">
+  <meta name="google-site-verification" content="LMcddVW6xLBS7X1htGQ3duOIEmVp4ljku8sd3UuIcBg">
+
+<link rel="stylesheet" href="/docs/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,400,400italic,700,700italic%7CNoto+Sans+KR:300,300italic,400,400italic,700,700italic%7CBinggrae-Bold:300,300italic,400,400italic,700,700italic%7CJetbrains+Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mambo-dev.github.io","root":"/docs/","images":"/docs/images","scheme":"Gemini","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"width":240,"scrollpercent":true,"b2t":true},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+<meta name="description" content="Overview본 글은 스프링 프레임워크 Version 5.2.8.RELEASE 문서를 기반으로 작성하였습니다. Task Execution and Scheduling스프링 프레임워크는 비동기적으로 어떠한 작업을 수행하거나 반복적으로 수행해야하는 스케줄링 기능을 지원하기 위하여 TaskExecutor와 TaskScheduler 인터페이스를 제공합니다.  Sc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="스프링 웹 애플리케이션 - 태스크 수행 및 스케줄링">
+<meta property="og:url" content="https://mambo-dev.github.io/spring-web-application-task-execution-and-scheduling/index.html">
+<meta property="og:site_name" content="Mambo Docs">
+<meta property="og:description" content="Overview본 글은 스프링 프레임워크 Version 5.2.8.RELEASE 문서를 기반으로 작성하였습니다. Task Execution and Scheduling스프링 프레임워크는 비동기적으로 어떠한 작업을 수행하거나 반복적으로 수행해야하는 스케줄링 기능을 지원하기 위하여 TaskExecutor와 TaskScheduler 인터페이스를 제공합니다.  Sc">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2020-09-14T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-02-16T12:54:23.977Z">
+<meta property="article:author" content="Mambo">
+<meta property="article:tag" content="스프링 프레임워크">
+<meta property="article:tag" content="스프링 튜토리얼">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://mambo-dev.github.io/spring-web-application-task-execution-and-scheduling/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'ko'
+  };
+</script>
+<title>스프링 웹 애플리케이션 - 태스크 수행 및 스케줄링 | Mambo Docs</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-93954323-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+  
+  <script data-ad-client="ca-pub-9304279418886145" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/docs/atom.xml" title="Mambo Docs" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/docs/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Mambo Docs</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Mambo's development guide</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/docs/" rel="section"><i class="fas fa-home fa-fw"></i>홈</a></li>
+        <li class="menu-item menu-item-archives"><a href="/docs/archives/" rel="section"><i class="fas fa-archive fa-fw"></i>아카이브<span class="badge">13</span></a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-가이드"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 가이드</a></li>
+        <li class="menu-item menu-item-스프링-프레임워크-이야기"><a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EC%9D%B4%EC%95%BC%EA%B8%B0/" rel="section"><i class="fas fa-book fa-fw"></i>스프링 프레임워크 이야기</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          목차
+        </li>
+        <li class="sidebar-nav-overview">
+          흝어보기
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Task-Execution-and-Scheduling"><span class="nav-number">2.</span> <span class="nav-text">Task Execution and Scheduling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Scheduling"><span class="nav-number">2.1.</span> <span class="nav-text">Scheduling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Asynchronous-Execution"><span class="nav-number">2.2.</span> <span class="nav-text">Asynchronous Execution</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Quartz-Scheduler"><span class="nav-number">3.</span> <span class="nav-text">Quartz Scheduler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBeanJobFactory"><span class="nav-number">3.1.</span> <span class="nav-text">SpringBeanJobFactory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SchedulerFactoryBean"><span class="nav-number">3.2.</span> <span class="nav-text">SchedulerFactoryBean</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#QuartzJobBean"><span class="nav-number">3.3.</span> <span class="nav-text">QuartzJobBean</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DisallowConcurrentExecution"><span class="nav-number">3.4.</span> <span class="nav-text">DisallowConcurrentExecution</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler-Clustering"><span class="nav-number">4.</span> <span class="nav-text">Scheduler Clustering</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JDBCJobStore"><span class="nav-number">4.1.</span> <span class="nav-text">JDBCJobStore</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Mambo"
+      src="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+  <p class="site-author-name" itemprop="name">Mambo</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/docs/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">포스트</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">카테고리</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">태그</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/kdevkr" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;kdevkr" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kdevkr@gmail.com" title="E-Mail → mailto:kdevkr@gmail.com" rel="noopener" target="_blank"><i class="fas fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ko" class="cc-opacity" rel="noopener" target="_blank"><img src="/docs/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="ko">
+    <link itemprop="mainEntityOfPage" href="https://mambo-dev.github.io/spring-web-application-task-execution-and-scheduling/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/17937604?s=460&v=4">
+      <meta itemprop="name" content="Mambo">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mambo Docs">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          스프링 웹 애플리케이션 - 태스크 수행 및 스케줄링
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">작성일</span>
+
+      <time title="Post created: 2020-09-14 00:00:00" itemprop="dateCreated datePublished" datetime="2020-09-14T00:00:00Z">2020-09-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/docs/categories/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%80%EC%9D%B4%EB%93%9C/" itemprop="url" rel="index"><span itemprop="name">스프링 프레임워크 가이드</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>본 글은 스프링 프레임워크 Version <code>5.2.8.RELEASE</code> 문서를 기반으로 작성하였습니다.</p>
+<h2 id="Task-Execution-and-Scheduling"><a href="#Task-Execution-and-Scheduling" class="headerlink" title="Task Execution and Scheduling"></a>Task Execution and Scheduling</h2><p>스프링 프레임워크는 비동기적으로 어떠한 작업을 수행하거나 반복적으로 수행해야하는 스케줄링 기능을 지원하기 위하여 <code>TaskExecutor</code>와 <code>TaskScheduler</code> 인터페이스를 제공합니다. </p>
+<h3 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a>Scheduling</h3><p>스프링 프레임워크에서 반복적으로 수행하는 스케줄링은 <code>TaskScheduler</code> 인터페이스에 의해 동작합니다. 그리고 스케줄링 기능을 활성화하기 위한 <code>@EnableScheduling</code> 어노테이션을 제공합니다.</p>
+<p>구성 메타정보 클래스에 @EnableScheduling을 선언하면 <code>@Scheduled</code>에 의한 스케줄링을 활성화 할 수 있습니다. @Scheduled가 선언된 스케줄링 핸들러 함수를 수행하는 주체는 <code>TaskExecutor</code>가 담당합니다.</p>
+<p>일반적으로 사용되는 TaskScheduler는 <code>ThreadPoolTaskScheduler</code>입니다.</p>
+<figure class="highlight java"><figcaption><span>ScheduleConfig.java</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="meta">@ComponentScan(&#123;&quot;com.example.demo.schedule&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ScheduleConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> TaskScheduler <span class="title">threadPoolTaskScheduler</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ThreadPoolTaskScheduler taskScheduler = <span class="keyword">new</span> ThreadPoolTaskScheduler();</span><br><span class="line">        taskScheduler.setPoolSize(<span class="number">10</span>);</span><br><span class="line">        <span class="keyword">return</span> taskScheduler;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>예를 들어, 다음과 같이 크론 표현식을 사용하여 <code>1분 마다</code> 동작하는 스케줄링을 추가할 수 있습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExampleScheduler</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOG = LoggerFactory.getLogger(ExampleScheduler.class);</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ExampleScheduler</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Scheduled(cron = &quot;0 * * * * *&quot;, zone = &quot;Asia/Seoul&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">schedule</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       LOG.info(<span class="string">&quot;run, &#123;&#125;&quot;</span>, <span class="keyword">new</span> Date());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Asynchronous-Execution"><a href="#Asynchronous-Execution" class="headerlink" title="Asynchronous Execution"></a>Asynchronous Execution</h3><p>스프링 프레임워크는 태스크에 대한 수행을 <code>TaskExecutor</code> 인터페이스가 담당합니다. 그리고 비동기로 수행하는 것을 지원하기 위하여 <code>@EnableAsync</code>와 <code>@Async</code> 어노테이션을 제공합니다.</p>
+<p>구성 메타정보 클래스에 <code>@EnableAsync</code>를 선언하면 <code>@Async</code>가 선언된 함수는 비동기로 수행되며 수행을 담당하는 주체는 <code>TaskExecutor</code>가 됩니다.</p>
+<p>일반적으로 많이 사용되는 TaskExecutor 구현체는 <code>ThreadPoolTaskExecutor</code>입니다. </p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableAsync</span></span><br><span class="line"><span class="meta">@ComponentScan(&#123;&quot;com.example.demo.handler&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AsyncConfig</span> <span class="keyword">implements</span> <span class="title">AsyncConfigurer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> TaskExecutor <span class="title">asyncThreadPoolTaskExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ThreadPoolTaskExecutor taskExecutor = <span class="keyword">new</span> ThreadPoolTaskExecutor();</span><br><span class="line">        taskExecutor.setCorePoolSize(<span class="number">5</span>);</span><br><span class="line">        taskExecutor.setMaxPoolSize(<span class="number">10</span>);</span><br><span class="line">        taskExecutor.setQueueCapacity(<span class="number">25</span>);</span><br><span class="line">        <span class="keyword">return</span> taskExecutor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Executor <span class="title">getAsyncExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> asyncThreadPoolTaskExecutor();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위와 같이 <code>AsyncConfigurer</code> 인터페이스를 통해 비동기로 수행되는 <code>TaskExecutor</code>를 변경할 수 있게 되어 asyncThreadPoolTaskExecutor에 의해 스레드 풀에서 반환된 TaskExecutor가 비동기로 수행합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExampleService</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOG = LoggerFactory.getLogger(ExampleService.class);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ExampleService</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Async</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        LOG.debug(<span class="string">&quot;executed&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Quartz-Scheduler"><a href="#Quartz-Scheduler" class="headerlink" title="Quartz Scheduler"></a>Quartz Scheduler</h2><p><a target="_blank" rel="noopener" href="http://www.quartz-scheduler.org/"><code>Quartz</code></a>는 자바 애플리케이션을 위한 스케줄러 라이브러리입니다. 스프링의 태스크 스케줄러는 단일 애플리케이션에는 문제없이 사용할 수 있지만 분산 환경에서 동작해야하는 웹 애플리케이션에서는 사용할 수 없습니다. 이와 비교하여 쿼츠 스케줄러는 메모리 기반의 스케줄링 뿐만 아니라 JTA 트랜잭션과 클러스터링을 지원합니다.</p>
+<p><code>quartz</code>와 <code>spring-tx</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.quartz-scheduler:quartz:2.3.2&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.quartz-scheduler:quartz-jobs:2.3.2&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.springframework:spring-tx:5.2.8.RELEASE&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;org.springframework:spring-context-support:5.2.8.RELEASE&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>클래스패스에 <code>quartz.properties</code>를 생성하여 쿼츠 스케줄러에서 사용되는 프로퍼티를 기술합니다.</p>
+<figure class="highlight properties"><figcaption><span>quartz.properties</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"><span class="comment"># Configure Main Scheduler Properties</span></span><br><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"></span><br><span class="line"><span class="meta">org.quartz.scheduler.instanceName</span> = <span class="string">MyClusteredScheduler</span></span><br><span class="line"><span class="meta">org.quartz.scheduler.instanceId</span> = <span class="string">AUTO</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"><span class="comment"># Configure ThreadPool</span></span><br><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"></span><br><span class="line"><span class="meta">org.quartz.threadPool.class</span> = <span class="string">org.quartz.simpl.SimpleThreadPool</span></span><br><span class="line"><span class="meta">org.quartz.threadPool.threadCount</span> = <span class="string">25</span></span><br><span class="line"><span class="meta">org.quartz.threadPool.threadPriority</span> = <span class="string">5</span></span><br></pre></td></tr></table></figure>
+
+<p>application.properties에 쿼츠 스케줄러 설정을 위한 프로퍼티를 기술합니다.</p>
+<figure class="highlight properties"><figcaption><span>application.properties</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">spring.quartz.job-store-type</span>=<span class="string">MEMORY</span></span><br><span class="line"><span class="meta">spring.quartz.scheduler-name</span>=<span class="string">quartz-scheduler</span></span><br><span class="line"><span class="meta">spring.quartz.start-up-delay</span>=<span class="string">0</span></span><br><span class="line"><span class="meta">spring.quartz.auto-startup</span>=<span class="string">true</span></span><br><span class="line"><span class="meta">spring.quartz.overwrite-existing-jobs</span>=<span class="string">true</span></span><br><span class="line"><span class="meta">spring.quartz.wait-for-jobs-to-complete-on-shutdown</span>=<span class="string">true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="SpringBeanJobFactory"><a href="#SpringBeanJobFactory" class="headerlink" title="SpringBeanJobFactory"></a>SpringBeanJobFactory</h3><p><code>spring-context-support</code> 모듈에는 스케줄을 수행하는 <code>QuartzJobBean</code>을 동적으로 생성시킬 수 있도록 지원하는 <code>SpringBeanJobFactory</code> 클래스를 제공합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="meta">@ComponentScan(&#123;&quot;com.example.demo.schedule&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ScheduleConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobFactory <span class="title">quartzJobFactory</span><span class="params">(AutowireCapableBeanFactory beanFactory)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SpringBeanJobFactory()&#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">protected</span> Object <span class="title">createJobInstance</span><span class="params">(TriggerFiredBundle bundle)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                Object job = <span class="keyword">super</span>.createJobInstance(bundle);</span><br><span class="line">                beanFactory.autowireBean(job);</span><br><span class="line">                <span class="keyword">return</span> job;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SchedulerFactoryBean"><a href="#SchedulerFactoryBean" class="headerlink" title="SchedulerFactoryBean"></a>SchedulerFactoryBean</h3><p><code>spring-context-support</code> 모듈에는 쿼츠 스케줄러에 대한 라이프사이클을 관리할 수 있도록 <code>SchedulerFactoryBean</code> 클래스를 제공합니다. </p>
+<p>다음과 같이 SchedulerFactoryBean를 빈으로 등록합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="meta">@ComponentScan(&#123;&quot;com.example.demo.schedule&quot;&#125;)</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ScheduleConfig</span> <span class="keyword">implements</span> <span class="title">ApplicationContextAware</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ApplicationContext applicationContext;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobFactory <span class="title">quartzJobFactory</span><span class="params">(AutowireCapableBeanFactory beanFactory)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SpringBeanJobFactory()&#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">protected</span> Object <span class="title">createJobInstance</span><span class="params">(TriggerFiredBundle bundle)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                Object job = <span class="keyword">super</span>.createJobInstance(bundle);</span><br><span class="line">                beanFactory.autowireBean(job);</span><br><span class="line">                <span class="keyword">return</span> job;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> TaskExecutor <span class="title">quartzThreadPoolTaskExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ThreadPoolTaskExecutor taskExecutor = <span class="keyword">new</span> ThreadPoolTaskExecutor();</span><br><span class="line">        taskExecutor.setCorePoolSize(<span class="number">5</span>);</span><br><span class="line">        taskExecutor.setMaxPoolSize(<span class="number">10</span>);</span><br><span class="line">        taskExecutor.setQueueCapacity(<span class="number">25</span>);</span><br><span class="line">        <span class="keyword">return</span> taskExecutor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SchedulerFactoryBean <span class="title">schedulerFactoryBean</span><span class="params">(JobFactory jobFactory, List&lt;Trigger&gt; triggers)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        SchedulerFactoryBean schedulerFactoryBean = <span class="keyword">new</span> SchedulerFactoryBean();</span><br><span class="line">        schedulerFactoryBean.setApplicationContext(applicationContext);</span><br><span class="line">        schedulerFactoryBean.setTaskExecutor(quartzThreadPoolTaskExecutor());</span><br><span class="line">        schedulerFactoryBean.setJobFactory(jobFactory);</span><br><span class="line">        schedulerFactoryBean.setTriggers(triggers.toArray(<span class="keyword">new</span> Trigger[triggers.size()]));</span><br><span class="line"></span><br><span class="line">        Environment environment = applicationContext.getEnvironment();</span><br><span class="line">        QuartzProperties quartzProperties = <span class="keyword">new</span> QuartzProperties(environment);</span><br><span class="line">        schedulerFactoryBean.setSchedulerName(quartzProperties.getSchedulerName());</span><br><span class="line">        schedulerFactoryBean.setStartupDelay(quartzProperties.getStartUpDelay());</span><br><span class="line">        schedulerFactoryBean.setAutoStartup(quartzProperties.isAutoStartup());</span><br><span class="line">        schedulerFactoryBean.setOverwriteExistingJobs(quartzProperties.isOverwriteExistingJobs());</span><br><span class="line">        schedulerFactoryBean.setWaitForJobsToCompleteOnShutdown(quartzProperties.isWaitForJobsToCompleteOnShutdown());</span><br><span class="line">        schedulerFactoryBean.setQuartzProperties(quartzProperties.getProperties());</span><br><span class="line">        <span class="keyword">return</span> schedulerFactoryBean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setApplicationContext</span><span class="params">(ApplicationContext applicationContext)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.applicationContext = applicationContext;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>위 예제 코드에서 QuartzProperties는 다음과 같이 구성하였습니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> JobStoreType &#123;</span><br><span class="line">    MEMORY, JDBC</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuartzProperties</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> JobStoreType jobStoreType;</span><br><span class="line">    <span class="keyword">private</span> String schedulerName;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> startUpDelay;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> autoStartup;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> overwriteExistingJobs;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> waitForJobsToCompleteOnShutdown;</span><br><span class="line">    <span class="keyword">private</span> Properties properties;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">QuartzProperties</span><span class="params">(Environment environment)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.jobStoreType = environment.getProperty(<span class="string">&quot;spring.quartz.job-store-type&quot;</span>, JobStoreType.class, JobStoreType.MEMORY);</span><br><span class="line">        <span class="keyword">this</span>.schedulerName = environment.getProperty(<span class="string">&quot;spring.quartz.scheduler-name&quot;</span>, String.class, &quot;quartz-scheduler&quot;);</span><br><span class="line">        <span class="keyword">this</span>.startUpDelay = environment.getProperty(<span class="string">&quot;spring.quartz.start-up-delay&quot;</span>, Integer.class, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">this</span>.autoStartup = environment.getProperty(<span class="string">&quot;spring.quartz.auto-startup&quot;</span>, Boolean.class, <span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">this</span>.overwriteExistingJobs = environment.getProperty(<span class="string">&quot;spring.quartz.overwrite-existing-jobs&quot;</span>, Boolean.class, <span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">this</span>.waitForJobsToCompleteOnShutdown = environment.getProperty(<span class="string">&quot;spring.quartz.wait-for-jobs-to-complete-on-shutdown&quot;</span>, Boolean.class, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">        PropertiesFactoryBean propertiesFactoryBean = <span class="keyword">new</span> PropertiesFactoryBean();</span><br><span class="line">        propertiesFactoryBean.setLocation(<span class="keyword">new</span> ClassPathResource(<span class="string">&quot;quartz.properties&quot;</span>));</span><br><span class="line">        propertiesFactoryBean.afterPropertiesSet();</span><br><span class="line">        <span class="keyword">this</span>.properties = propertiesFactoryBean.getObject();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// getters...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="QuartzJobBean"><a href="#QuartzJobBean" class="headerlink" title="QuartzJobBean"></a>QuartzJobBean</h3><p><code>spring-context-support</code>에는 쿼츠 스케줄러가 스케줄을 수행하는 Job 구현체를 제공합니다. 애플리케이션 개발자는 QuartzJobBean를 빈으로 등록함으로써 쿼츠 스케줄러 잡을 등록할 수 있습니다.</p>
+<p>다음은 QuartzJobBean을 확장한 잡을 구성하는 예제입니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuartzSampleJob</span> <span class="keyword">extends</span> <span class="title">QuartzJobBean</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOG = LoggerFactory.getLogger(QuartzSampleJob.class);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String IDENTITY = <span class="string">&quot;QuartzSampleJob&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">executeInternal</span><span class="params">(JobExecutionContext context)</span> <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line">        LOG.info(<span class="string">&quot;Execute using quartz scheduler!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(name = &quot;QuartzSampleJob&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobDetail <span class="title">jobDetail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> JobBuilder.newJob().ofType(<span class="keyword">this</span>.getClass())</span><br><span class="line">                .withIdentity(IDENTITY)</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(name = &quot;QuartzSampleJobTrigger&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CronTriggerFactoryBean <span class="title">jobTrigger</span><span class="params">(<span class="meta">@Qualifier(&quot;QuartzSampleJob&quot;)</span> JobDetail jobDetail)</span> </span>&#123;</span><br><span class="line">        CronTriggerFactoryBean factoryBean = <span class="keyword">new</span> CronTriggerFactoryBean();</span><br><span class="line">        factoryBean.setJobDetail(jobDetail);</span><br><span class="line">        factoryBean.setCronExpression(<span class="string">&quot;0/5 * * * * ?&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> factoryBean;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>쿼츠 스케줄러는 <code>JobDetail</code>을 통해 Job의 수행 방식과 실행에 필요한 정보를 참조합니다. 또한, Trigger에는 JobDetail을 어떻게 실행되어야하는지를 결정합니다. 위 예제에서는 CronTrigger를 사용하여 크론 표현식을 통해 반복적으로 수행하도록 하였습니다.</p>
+<p>따라서, 쿼츠 스케줄러는 JobDetail과 Trigger에 의해 스케줄링 기능을 수행하며 애플리케이션 개발자인 우리는 QuartzJobBean에 대한 JobDetail과 Trigger를 빈으로 등록하는 과정을 수행하면 됩니다.</p>
+<p>이제 애플리케이션을 수행하면 다음과 같이 쿼츠 스케줄러에 대한 로그와 함께 스케줄링이 수행되는 로그가 출력됩니다.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2020-09-18 15:54:40 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor(181) - Initializing ExecutorService &#39;quartzThreadPoolTaskExecutor&#39;</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.i.StdSchedulerFactory(1220) - Using default implementation for ThreadExecutor</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.c.SchedulerSignalerImpl(61) - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.core.QuartzScheduler(229) - Quartz Scheduler v.2.3.2 created.</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.simpl.RAMJobStore(155) - RAMJobStore initialized.</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.core.QuartzScheduler(294) - Scheduler meta-data: Quartz Scheduler (v2.3.2) &#39;quartz-scheduler&#39; with instanceId &#39;NON_CLUSTERED&#39;</span><br><span class="line">  Scheduler class: &#39;org.quartz.core.QuartzScheduler&#39; - running locally.</span><br><span class="line">  NOT STARTED.</span><br><span class="line">  Currently in standby mode.</span><br><span class="line">  Number of jobs executed: 0</span><br><span class="line">  Using thread pool &#39;org.quartz.simpl.SimpleThreadPool&#39; - with 25 threads.</span><br><span class="line">  Using job-store &#39;org.quartz.simpl.RAMJobStore&#39; - which does not support persistence. and is not clustered.</span><br><span class="line"></span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.i.StdSchedulerFactory(1374) - Quartz scheduler &#39;quartz-scheduler&#39; initialized from an externally provided properties instance.</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.i.StdSchedulerFactory(1378) - Quartz scheduler version: 2.3.2</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.core.QuartzScheduler(2293) - JobFactory set to: com.example.demo.config.ScheduleConfig$1@611ffa8d</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.s.s.q.SchedulerFactoryBean(727) - Starting Quartz Scheduler now</span><br><span class="line">2020-09-18 15:54:40 [main] INFO  o.q.core.QuartzScheduler(547) - Scheduler quartz-scheduler_$_NON_CLUSTERED started.</span><br><span class="line">2020-09-18 15:54:40 [quartz-scheduler_Worker-1] INFO  c.e.d.s.QuartzSampleJob(21) - Execute using quartz scheduler!</span><br></pre></td></tr></table></figure>
+
+<h3 id="DisallowConcurrentExecution"><a href="#DisallowConcurrentExecution" class="headerlink" title="DisallowConcurrentExecution"></a>DisallowConcurrentExecution</h3><p>쿼츠 스케줄러에는 스케줄이 동작하고 있는 Job이 수행되고있는 시간이 길어지면 다음에 실행되어야하는 작업과 겹치지 않도록 <code>DisallowConcurrentExecution</code>을 제공합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@DisallowConcurrentExecution</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuartzSampleJob</span> <span class="keyword">extends</span> <span class="title">QuartzJobBean</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Scheduler-Clustering"><a href="#Scheduler-Clustering" class="headerlink" title="Scheduler Clustering"></a>Scheduler Clustering</h2><p>스프링 프레임워크 기반의 웹 애플리케이션이 분산 환경에서 동작하는 경우 하나의 인스턴스에서만 스케줄링이 수행되어야하는 요구사항이 있습니다. 쿼츠 스케줄러는 JDBC을 사용하여 스케줄러 동작을 클러스터링할 수 있도록 지원하는 JDBCJobStore를 제공합니다.</p>
+<h3 id="JDBCJobStore"><a href="#JDBCJobStore" class="headerlink" title="JDBCJobStore"></a>JDBCJobStore</h3><p><code>JDBCJobStore</code>는 JDBC API를 통해 스케줄러를 관리할 수 있는 기능을 제공합니다. 본 예제에서는 PostgreSQL을 기반으로 설정하도록 하겠습니다.</p>
+<p>먼저 <code>postgresql</code> 의존성을 추가합니다.</p>
+<figure class="highlight groovy"><figcaption><span>build.gradle</span></figcaption><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;org.postgresql:postgresql:42.2.16&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>그리고 다음과 같이 쿼츠 스케줄러 프로퍼티를 기술합니다.</p>
+<figure class="highlight properties"><figcaption><span>quartz.properties</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"><span class="comment"># Configure JobStore</span></span><br><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"></span><br><span class="line"><span class="meta">org.quartz.jobStore.misfireThreshold</span> = <span class="string">60000</span></span><br><span class="line"></span><br><span class="line"><span class="meta">org.quartz.jobStore.class</span> = <span class="string">org.quartz.impl.jdbcjobstore.JobStoreTX</span></span><br><span class="line"><span class="meta">org.quartz.jobStore.driverDelegateClass</span> = <span class="string">org.quartz.impl.jdbcjobstore.PostgreSQLDelegate</span></span><br><span class="line"><span class="meta">org.quartz.jobStore.useProperties</span> = <span class="string">false</span></span><br><span class="line"><span class="meta">org.quartz.jobStore.dataSource</span> = <span class="string">quartzDS</span></span><br><span class="line"><span class="meta">org.quartz.jobStore.tablePrefix</span> = <span class="string">QRTZ_</span></span><br><span class="line"></span><br><span class="line"><span class="meta">org.quartz.jobStore.isClustered</span> = <span class="string">true</span></span><br><span class="line"><span class="meta">org.quartz.jobStore.clusterCheckinInterval</span> = <span class="string">20000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"><span class="comment"># Configure Datasources</span></span><br><span class="line"><span class="comment">#============================================================================</span></span><br><span class="line"></span><br><span class="line"><span class="meta">org.quartz.dataSource.quartzDS.driver</span> = <span class="string">org.postgresql.Driver</span></span><br><span class="line"><span class="meta">org.quartz.dataSource.quartzDS.URL</span> = <span class="string">jdbc:postgresql://localhost:5432/quartz</span></span><br><span class="line"><span class="meta">org.quartz.dataSource.quartzDS.user</span> = <span class="string">quartz</span></span><br><span class="line"><span class="meta">org.quartz.dataSource.quartzDS.password</span> = <span class="string">quartz</span></span><br></pre></td></tr></table></figure>
+
+<p>쿼츠 스케줄러에서 사용할 DataSource는 <code>quartzDS</code>이며 PostgreSQL 드라이버를 사용하도록 설정하였습니다. 위 프로퍼티에 기술된 정보대로 PostgreSQL에 데이터베이스를 생성합니다.</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> quartz <span class="keyword">WITH</span> ENCRYPTED <span class="keyword">PASSWORD</span> <span class="string">&#x27;quartz&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> quartz;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> <span class="keyword">DATABASE</span> quartz <span class="keyword">TO</span> quartz;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/resources/org/quartz/impl/jdbcjobstore/tables_postgres.sql"><code>tables_postgres.sql</code></a>을 실행하여 JDBCJobStore에서 사용할 테이블 스키마를 생성합니다.</p>
+<ul>
+<li>qrtz_blob_triggers</li>
+<li>qrtz_calendars</li>
+<li>qrtz_cron_triggers</li>
+<li>qrtz_fired_triggers</li>
+<li>qrtz_job_details</li>
+<li>qrtz_locks</li>
+<li>qrtz_paused_trigger_grps</li>
+<li>qrtz_scheduler_state</li>
+<li>qrtz_simple_triggers</li>
+<li>qrtz_simprop_triggers</li>
+<li>qrtz_triggers</li>
+</ul>
+<p>다음과 같이 JobDetail에 대해 <code>storeDurably</code>를 활성화합니다.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@DisallowConcurrentExecution</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuartzSampleJob</span> <span class="keyword">extends</span> <span class="title">QuartzJobBean</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean(name = &quot;QuartzSampleJob&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobDetail <span class="title">jobDetail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> JobBuilder.newJob().ofType(<span class="keyword">this</span>.getClass())</span><br><span class="line">                .withIdentity(IDENTITY)</span><br><span class="line">                .storeDurably(<span class="keyword">true</span>)</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>이제 애플리케이션을 실행하면 쿼츠 스케줄러가 데이터베이스에 저장된 정보에 의해 스케줄링이 실행됩니다.</p>
+<hr>
+<p>이제 여러분은 스프링 프레임워크 기반의 애플리케이션에서 비동기로 수행되어야하는 로직을 처리할 수 있으며 반복적으로 수행되어야하는 스케줄링을 적용할 수 있게 되었습니다.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC/" rel="tag"># 스프링 프레임워크</a>
+              <a href="/docs/tags/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%8A%9C%ED%86%A0%EB%A6%AC%EC%96%BC/" rel="tag"># 스프링 튜토리얼</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/docs/spring-web-application-testing/" rel="prev" title="스프링 웹 애플리케이션 - 단위 테스트">
+                  <i class="fa fa-chevron-left"></i> 스프링 웹 애플리케이션 - 단위 테스트
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/docs/spring-web-application-database-access/" rel="next" title="스프링 웹 애플리케이션 - 데이터베이스 액세스">
+                  스프링 웹 애플리케이션 - 데이터베이스 액세스 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  
+  <div class="comments">
+  <script src="https://utteranc.es/client.js" repo="kdevkr/kdevkr.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+  </div>
+  
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+      <aside class="adsense-block">
+        <div class="adsense-block-wrapper">
+          <!-- AdSense Display -->
+          <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-client="ca-pub-9304279418886145"
+              data-ad-slot="3137426518"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+          <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mambo</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/docs/js/utils.js"></script><script src="/docs/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>
