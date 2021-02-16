@@ -9,8 +9,8 @@ language:                        ko
 timezone:                        UTC
 
 # URL
-url:                             https://mambo-docs.github.io
-root:                            /
+url:                             https://mambo-dev.github.io
+root:                            /docs
 permalink:                       :title/
 permalink_defaults:
 
